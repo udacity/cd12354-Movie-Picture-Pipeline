@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+uwsgi = "*"
+flask-cors = "*"
+pytest = "*"
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+coverage = "*"
+
+[requires]
+python_version = "3.10"
+
+[scripts]
+serve = "flask --app . run --port 5000 --debug"
+test = "pytest -v"
+lint = "flake8"
+report = "coverage run -m pytest -v"
+lint-fail = "flake8 --max-line-length=88"
