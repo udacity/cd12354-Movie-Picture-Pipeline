@@ -13,14 +13,14 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
 
 ### Frontend
 
-1. A Continuous Integration pipeline that:
+1. A Continuous Integration workflow that:
    1. Runs on `pull_requests` against the `main` branch,only when code in the frontend application changes.
    2. Is able to be run on-demand (i.e. manually without needing to push code)
    3. Runs the following jobs in parallel:
       1. Runs a linting job that fails if the code doesn't adhere to eslint rules
       2. Runs a test job that fails if the test suite doesn't pass
    4. Runs a build job only if the lint and test jobs pass and successfully builds the application
-2. A Continuous Deployment pipeline that:
+2. A Continuous Deployment workflow that:
    1. Runs on `push` against the `main` branch, only when code in the frontend application changes.
    2. Is able to be run on-demand (i.e. manually without needing to push code)
    3. Runs the same lint/test jobs as the Continuous Integration workflow
@@ -31,14 +31,14 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
 
 ### Backend
 
-1. A Continuous Integration pipeline that:
+1. A Continuous Integration workflow that:
    1. Runs on `pull_requests` against the `main` branch,only when code in the frontend application changes.
    2. Is able to be run on-demand (i.e. manually without needing to push code)
    3. Runs the following jobs in parallel:
       1. Runs a linting job that fails if the code doesn't adhere to eslint rules
       2. Runs a test job that fails if the test suite doesn't pass
    4. Runs a build job only if the lint and test jobs pass and successfully builds the application
-2. A Continuous Deployment pipeline that:
+2. A Continuous Deployment workflow that:
    1. Runs on `push` against the `main` branch, only when code in the frontend application changes.
    2. Is able to be run on-demand (i.e. manually without needing to push code)
    3. Runs the same lint/test jobs as the Continuous Integration workflow
@@ -227,6 +227,34 @@ FAIL_LINT=true npm run lint
 ✖ 2 problems (2 errors, 0 warnings)
 ```
 
+### Build and run
+
+For local development without docker, the developers use the following commands:
+
+```bash
+cd starter/frontend
+
+# Install dependencies
+npm ci
+
+# Run local development server with hot reloading and point to the backend default
+REACT_APP_MOVIE_API_URL=http://localhost:5000 npm start
+```
+
+To build the frontend application for a production deployment, they use the following commands:
+
+```bash
+# Build the image
+# NOTE: Make sure the image is built with the URL of the backend system.
+# The URL below would be the default backend URL when running locally
+docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
+
+docker run --name mp-frontend -p 3000:3000 -d mp-frontend]
+
+# Open the browser to localhost:3000 and you should see the list of movies,
+# provided the backend is available on localhost:5000
+```
+
 ## Backend Development notes
 
 ### Running tests
@@ -294,7 +322,7 @@ pipenv run lint
 # No output
 ```
 
-To simulate linting errors, you can run the linting command like so:
+To simulate linting errors, you can run the linting command below. The command overrides our lint configuration and will error if any lines are over 88 characters.
 
 ```bash
 pipenv run lint-fail
@@ -307,7 +335,43 @@ pipenv run lint-fail
 ./movies/resources.py:16:89: E501 line too long (117 > 88 characters)
 ```
 
-The command overrides our lint configuration and will error if any lines are over 88 characters.
+### Build and run
+
+For local development without docker, the developers use the following commands to build and run the backend application:
+
+```bash
+cd starter/backend
+
+# Install dependencies
+pipenv install
+
+# Run application
+pipenv run serve
+```
+
+For production deployments, the team uses the following commands to build and run the Docker image.
+
+```bash
+cd starter/backend
+
+# Build the image
+docker build --tag mp-backend:latest .
+
+# Run the image
+docker run -p 5000:5000 --name mp-backend -d mp-backend
+
+# Check the running application
+curl http://localhost:5000/movies
+
+# Review logs
+docker logs -f mp-backend
+
+# Expected output
+{"movies":[{"id":"123","title":"Top Gun: Maverick"},{"id":"456","title":"Sonic the Hedgehog"},{"id":"789","title":"A Quiet Place"}]}
+
+# Stop the application
+docker stop
+```
 
 ## License
 
