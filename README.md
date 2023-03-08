@@ -48,7 +48,7 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
       1. The manifest should deploy the newly created tagged image
 
 **⚠️ NOTE**
-Once you begin work on Continuous Deployment, you'll need to first setup the AWS and Kubernetes environment. Follow the [instrunctions below](#setting-up-continuous-deployment-environment)  instructions only when you're ready to start testing your deployments.
+Once you begin work on Continuous Deployment, you'll need to first setup the AWS and Kubernetes environment. Follow the [instructions below](#setting-up-continuous-deployment-environment)  instructions only when you're ready to start testing your deployments.
 
 ## Setting up Continuous Deployment environment
 
