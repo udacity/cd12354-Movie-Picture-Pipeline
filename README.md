@@ -28,6 +28,7 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
       1. The built docker image should be tagged with the git sha
    5. Runs a deploy job that applies the Kubernetes manifests to the provided cluster.
       1. The manifest should deploy the newly created tagged image
+      2. The tag applied to the image should be the git SHA of the commit that triggered the build
 
 ### Backend
 
@@ -46,6 +47,7 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
       1. The built docker image should be tagged with the git sha
    5. Runs a deploy job that applies the Kubernetes manifests to the provided cluster.
       1. The manifest should deploy the newly created tagged image
+      2. The tag applied to the image should be the git SHA of the commit that triggered the build
 
 **⚠️ NOTE**
 Once you begin work on Continuous Deployment, you'll need to first setup the AWS and Kubernetes environment. Follow the [instructions below](#setting-up-continuous-deployment-environment)  instructions only when you're ready to start testing your deployments.
@@ -93,7 +95,6 @@ Now that the cluster and all AWS resources have been created, you'll need to add
 ```bash
 cd setup
 ./init.sh
-
 ```
 
 2. The script will download a tool, add the IAM user ARN to the authentication configuration, indicate a `Done` status, then it'll remove the tool
@@ -110,7 +111,7 @@ All of the tools below will be available in the workspace
 * [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) - Used for managing NodeJS versions
 * [tfswitch](https://tfswitch.warrensbox.com/Install/) Used for managing Terraform versions
 * [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/) Used for building the Kubernetes manifests dynamically in the CI environment
-* [jq]() for parsing JSON more easily on the command line
+* [jq](https://stedolan.github.io/jq/download/) for parsing JSON more easily on the command line
 
 ## Frontend Development notes
 
@@ -147,7 +148,6 @@ To simulate a failure in the test coverage, which will be needed to ensure your 
 
 ```bash
 FAIL_TEST=true CI=true npm test
-
 ```
 
 As the test is expecting the heading to contain a certain value, we can simulate a failure by changing it with an inline or environment variable. If you use the environment variable, make sure to unset it when you're done testing
@@ -252,7 +252,24 @@ docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-
 docker run --name mp-frontend -p 3000:3000 -d mp-frontend]
 
 # Open the browser to localhost:3000 and you should see the list of movies,
-# provided the backend is available on localhost:5000
+# provided the backend is already running and available on localhost:5000
+```
+
+### Deploy Kubernetes manifests
+
+In order to build the Kubernetes manifests correctly, the team uses `kustomize` in the following way:
+
+```bash
+cd starter/frontend/k8s
+# Make sure you're kubeconfig is configured for the EKS cluster, i.e.
+# aws eks update-kubeconfig
+
+# Set the image tag to the newer version
+# ℹ️ Don't commit any changes to the manifests that this command introduces
+kustomize edit set image frontend=<ECR_REPO_URL>:<NEW_TAG_HERE>
+
+# Apply the manifests to the cluster
+kustomize build | kubectl apply -f -
 ```
 
 ## Backend Development notes
@@ -371,6 +388,23 @@ docker logs -f mp-backend
 
 # Stop the application
 docker stop
+```
+
+### Deploy Kubernetes manifests
+
+In order to build the Kubernetes manifests correctly, the team uses `kustomize` in the following way:
+
+```bash
+cd starter/backend/k8s
+# Make sure you're kubeconfig is configured for the EKS cluster, i.e.
+# aws eks update-kubeconfig
+
+# Set the image tag to the newer version
+# ℹ️ Don't commit any changes to the manifests that this command introduces
+kustomize edit set image backend=<ECR_REPO_URL>:<NEW_TAG_HERE>
+
+# Apply the manifests to the cluster
+kustomize build | kubectl apply -f -
 ```
 
 ## License
