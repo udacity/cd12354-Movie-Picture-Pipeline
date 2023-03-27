@@ -11,3 +11,4 @@ jobs:
   build:
     steps:
       - run: echo "Building"
+      - run: echo "Hello"
