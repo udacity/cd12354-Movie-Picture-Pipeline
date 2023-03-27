@@ -1,0 +1,13 @@
+name: frontend ci flow
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+
+jobs:
+  build:
+    steps:
+      - run: echo "Building"
