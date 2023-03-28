@@ -9,8 +9,12 @@ on:
       - 'starter/frontend/**'
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Building"
-      - run: echo "Hello"
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm run lint
+        working-directory: starter/frontend
