@@ -1,6 +1,7 @@
 name: frontend ci flow
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -9,5 +10,7 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     steps:
       - run: echo "Building"
+      - run: echo "Hello"
