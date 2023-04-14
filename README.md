@@ -48,7 +48,6 @@ You'll find 2 folders, one named `frontend` and one named `backend`, where each 
    5. Runs a deploy job that applies the Kubernetes manifests to the provided cluster.
       1. The manifest should deploy the newly created tagged image
       2. The tag applied to the image should be the git SHA of the commit that triggered the build
-      3. 
 **⚠️ NOTE**
 Once you begin work on Continuous Deployment, you'll need to first setup the AWS and Kubernetes environment. Follow [these instructions ](#setting-up-continuous-deployment-environment) only when you're ready to start testing your deployments.
 
