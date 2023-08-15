@@ -1,0 +1,79 @@
+name: frontend-ci-workflow
+
+# Ensure the workflow
+on:
+    workflow_dispatch:
+    pull_request:
+        branches:
+        - main
+
+
+# Jobs defined in the workflow
+jobs:
+    build-and-test-1:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Set up Node.js 
+          uses: actions/setup-node@v3
+          with:
+            node-version: latest
+
+        - name: Install dependencies
+          run: npm test
+  
+        - name: Print a message for main branch
+          if: github.ref == 'refs/heads/main'
+          run: echo "This is the main branch."
+  
+        - name: Print a message for non-main branches
+          if: github.ref != 'refs/heads/main'
+          run: echo "This is not the main branch."
+  
+        - name: Run tests
+          run: npm test
+  
+        - name: Debug message
+          if: env.DEBUG == 'true'
+          run: echo "Debugging is enabled."
+  
+    build-and-test-2:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Set up Node.js 
+          uses: actions/setup-node@v3
+          with:
+            node-version: latest
+
+        - name: Install dependencies
+          run: npm test
+  
+        - name: Print a message for main branch
+          if: github.ref == 'refs/heads/main'
+          run: echo "This is the main branch."
+  
+        - name: Print a message for non-main branches
+          if: github.ref != 'refs/heads/main'
+          run: echo "This is not the main branch."
+  
+        - name: Run tests
+          run: npm test
+  
+        - name: Debug message
+          if: env.DEBUG == 'true'
+          run: echo "Debugging is enabled."
+  
+    post-build-actions:
+      needs: [build-and-test-1, build-and-test-2]
+      runs-on: ubuntu-latest
+      steps:
+        - name: Publish test results
+          uses: actions/upload-artifact@v3
+          with:
+            name: tam-results
+            path: tam-results.xml
