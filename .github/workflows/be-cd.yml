@@ -1,0 +1,120 @@
+name: BECD
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+
+jobs:
+  lint:
+    name: BE Linting Job
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Cache pipenv dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pipenv
+          key: pipenv-${{ runner.os }}-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            pipenv-${{ runner.os }}-
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install pipenv
+        run: |
+          pip install pipenv
+
+      - name: Install dependencies
+        run: |
+          pipenv install
+
+      - name: Run lint
+        run: |
+          pipenv run lint
+
+  test:
+    name: BE Test Job
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install pipenv
+        run: |
+          pip install pipenv && pip install flake8
+
+      - name: Install dependencies
+        run: |
+          pipenv install
+
+      - name: Run tests
+        run: |
+          pipenv run test
+
+  build:
+    name: BE Build Job
+    needs: [lint-job, test-job]
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Build, Tag, Push Docker image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd ./starter/backend
+          docker build -t backend .
+          docker tag backend:$IMAGE_TAG 275244404389.dkr.ecr.us-east-1.amazonaws.com/backend:$IMAGE_TAG
+          docker push 275244404389.dkr.ecr.us-east-1.amazonaws.com/backend:$IMAGE_TAG
+
+      - name: Run init
+        run: |
+          cd ./setup
+          ./init.sh || true
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name cluster --region us-east-1
+
+      - name: Apply Kubernetes
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd ./starter/backend/k8s
+          kustomize edit set image backend=275244404389.dkr.ecr.us-east-1.amazonaws.com/backend:$IMAGE_TAG
+          kustomize build | kubectl apply -f -

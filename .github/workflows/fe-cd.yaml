@@ -1,0 +1,100 @@
+name: FECD
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+
+jobs:
+  lint-job:
+    name: FE Linting Job
+    runs-on: ubuntu-latest 
+    defaults:
+      run:
+        working-directory: ./starter/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            npm-
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run ESLint
+        run: |
+          npm run lint
+
+  test-job:
+    name: FE Test Job
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run tests
+        run: |
+          npm test
+
+  build:
+    name: FE Build Job
+    needs: [lint-job, test-job]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: us-east-1
+
+      - name: Build, Tag, Push Docker image
+        run: |
+          cd ./starter/frontend
+          docker build -t frontend --build-arg=REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} .
+          docker tag frontend:latest 275244404389.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          docker push 275244404389.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+      
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name cluster --region us-east-1
+      
+      - name: Apply Kubernetes
+        run: |
+          cd ./starter/frontend/k8s
+          kustomize edit set image frontend=275244404389.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          kustomize build | kubectl apply -f -
