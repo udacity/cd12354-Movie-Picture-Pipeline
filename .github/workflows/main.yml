@@ -1,0 +1,8 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/' # Adjust the path based on your frontend code location
