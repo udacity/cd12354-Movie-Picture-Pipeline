@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # Expose the port used by the React app
-EXPOSE 3000
+EXPOSE 300
 
 # Start the React app when the container starts test
 CMD ["npm", "run", "serve"]
