@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '../../starter/frontend/*'
+      - '../../starter/frontend/'
 # jobs:
 #   deploy:
 
