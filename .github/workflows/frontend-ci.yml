@@ -3,9 +3,9 @@ name: Frontend CI
 on:
   pull_request:
     branches:
-      - main
-    # paths:
-    #   - '../../starter/frontend/'
+      - test
+    paths:
+      - '/starter/frontend'
 # jobs:
 #   deploy:
 
