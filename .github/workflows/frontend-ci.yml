@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'starter/frontend/Dockerfile'
+      - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
