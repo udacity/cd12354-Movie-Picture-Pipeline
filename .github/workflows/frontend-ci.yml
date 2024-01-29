@@ -1,13 +1,13 @@
 name: Frontend CI
 
-on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
-    paths:
-      - '../../../starter/frontend/**'
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     types:
+#       - closed
+#     paths:
+#       - '../../starter/frontend/**'
 # jobs:
 #   deploy:
 
