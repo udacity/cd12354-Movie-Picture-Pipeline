@@ -1,7 +1,8 @@
 name: Frontend CI
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
+
+# on:
   # pull_request:
 #     branches:
 #       - main
