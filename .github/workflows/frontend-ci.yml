@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - '../../starter/frontend/**'
+=======
+      - 'starter/frontend'
 # jobs:
 #   deploy:
 
