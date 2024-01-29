@@ -1,51 +1,30 @@
-name: Frontend CI
+name: Continuous Integration
 
 on:
   pull_request:
     branches:
-      - test
+      - main
+    paths:
+      - 'starter/frontend/**'
   workflow_dispatch:
-#     types:
-#       - closed
-#     paths:
-#       - '../../starter/frontend/**'
-# jobs:
-#   deploy:
 
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - uses: actions/checkout@v3
-#     - name: Set up Python
-#       uses: actions/setup-python@v3
-#       with:
-#         python-version: '3.x'
-#     - name: Install dependencies
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install build
-#     - name: Build package
-#       run: python -m build
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-    - name: Debug working directory
-      # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-      run: |
-        ls -R
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '14'
 
-    # - name: Set up Node.js
-    #   uses: actions/setup-node@v4
-    #   with:
-    #     node-version: '14'
+    - name: Install Dependencies
+      run: npm install
 
-    # - name: Install dependencies
-    #   run: npm install
+    - name: Build Frontend
+      run: npm run build
 
-    # - name: Run frontend tests
-    #   run: npm test
+    # Add other steps as needed for your build and test process
