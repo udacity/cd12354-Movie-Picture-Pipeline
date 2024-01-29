@@ -16,15 +16,15 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '14'
+    - name: Debug working directory
+      # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+      run: |
+        ls -R
 
-    - name: Install Dependencies
-      run: npm install
+#     - name: Install Dependencies
+#       run: npm install
 
-    - name: Build Frontend
-      run: npm run build
+#     - name: Build Frontend
+#       run: npm run build
 
     # Add other steps as needed for your build and test process
