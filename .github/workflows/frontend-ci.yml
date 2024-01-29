@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - '../../starter/frontend/**'
+=======
       - 'starter/frontend'
 # jobs:
 #   deploy:
@@ -23,21 +25,21 @@ on:
 #         pip install build
 #     - name: Build package
 #       run: python -m build
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v4
-#       with:
-#         node-version: '14'
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '14'
 
-#     - name: Install dependencies
-#       run: npm install
+    - name: Install dependencies
+      run: npm install
 
-#     - name: Run frontend tests
-#       run: npm test
+    - name: Run frontend tests
+      run: npm test
