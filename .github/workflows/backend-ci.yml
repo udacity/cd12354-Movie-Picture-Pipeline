@@ -1,4 +1,4 @@
-name: Backend CI
+name: Continuous Integration
 
 on:
   pull_request:
@@ -16,20 +16,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        node-version: '20'
+        python-version: '3.9'
 
     - name: Install Dependencies
       run: |
         cd starter/backend
-        npm install
+        pip install -r requirements.txt  # Adjust as needed for your project
 
     - name: Lint Code
       run: |
         cd starter/backend
-        npm run lint
+        pylint your_module.py  # Adjust as needed for your project structure
 
   test:
     runs-on: ubuntu-latest
@@ -38,41 +38,121 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        node-version: '20'
+        python-version: '3.9'
 
     - name: Install Dependencies
       run: |
         cd starter/backend
-        npm install
+        pip install -r requirements.txt  # Adjust as needed for your project
 
     - name: Run Tests
       run: |
         cd starter/backend
-        npm test
+        python -m unittest discover tests  # Adjust as needed for your project structure
 
   build:
     runs-on: ubuntu-latest
-    needs: [lint, test]  # This ensures 'build' only runs if 'lint' and 'test' jobs succeed
+    needs: [lint, test]
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        node-version: '20'
+        python-version: '3.9'
 
     - name: Install Dependencies
       run: |
         cd starter/backend
-        npm install
+        pip install -r requirements.txt  # Adjust as needed for your project
 
-    - name: Build backend
+    - name: Build backend (Python example)
       run: |
         cd starter/backend
-        npm run build
+        ls -R 
+
+# Add other steps as needed for your build and test process
+
+# name: Backend CI
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'starter/backend/**'
+#   workflow_dispatch:
+
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout Repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '20'
+
+#     - name: Install Dependencies
+#       run: |
+#         cd starter/backend
+#         npm install
+
+#     - name: Lint Code
+#       run: |
+#         cd starter/backend
+#         npm run lint
+
+#   test:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout Repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '20'
+
+#     - name: Install Dependencies
+#       run: |
+#         cd starter/backend
+#         npm install
+
+#     - name: Run Tests
+#       run: |
+#         cd starter/backend
+#         npm test
+
+#   build:
+#     runs-on: ubuntu-latest
+#     needs: [lint, test]  # This ensures 'build' only runs if 'lint' and 'test' jobs succeed
+
+#     steps:
+#     - name: Checkout Repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '20'
+
+#     - name: Install Dependencies
+#       run: |
+#         cd starter/backend
+#         npm install
+
+#     - name: Build backend
+#       run: |
+#         cd starter/backend
+#         npm run build
 
