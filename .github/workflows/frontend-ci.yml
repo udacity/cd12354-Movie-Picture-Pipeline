@@ -21,10 +21,10 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Use correct NVM
-      run: |
-        cd starter/frontend
-        nvm use
+    # - name: Use correct NVM
+    #   run: |
+    #     cd starter/frontend
+    #     nvm use
 
     - name: Install Dependencies
       run: |
