@@ -1,11 +1,11 @@
-name: Frontend CI
+name: Backend CI
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - 'starter/frontend/**'
+      - 'starter/backend/**'
   workflow_dispatch:
 
 jobs:
@@ -23,12 +23,12 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm install
 
     - name: Lint Code
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm run lint
 
   test:
@@ -45,12 +45,12 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm install
 
     - name: Run Tests
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm test
 
   build:
@@ -68,11 +68,11 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm install
 
-    - name: Build Frontend
+    - name: Build backend
       run: |
-        cd starter/frontend
+        cd starter/backend
         npm run build
 
