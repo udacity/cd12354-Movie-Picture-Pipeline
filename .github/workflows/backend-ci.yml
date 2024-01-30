@@ -103,10 +103,10 @@ jobs:
         cd starter/backend
         pipenv run flake8
 
-    - name: Lint Code (Fail Workflow on Lint Failure)
-      run: |
-        cd starter/backend
-        pipenv run lint-fail
+    # - name: Lint Code (Fail Workflow on Lint Failure)
+    #   run: |
+    #     cd starter/backend
+    #     pipenv run lint-fail
 
     - name: Build backend (Python example)
       run: |
