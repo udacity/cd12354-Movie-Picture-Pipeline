@@ -44,7 +44,17 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-    
+
+    - name: Install Dependencies
+      run: |
+        cd starter/frontend
+        npm install
+
+    - name: Install ESLint
+      run: |
+        cd starter/frontend
+        npm install eslint --save-dev
+        
     - name: Lint Code
       run: |
         cd starter/frontend
