@@ -12,16 +12,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
-      # - run: npm install
-      # - run: npm test
-    - name: Debug working directory
-#       # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-      run: |
-        ls -R
+          node-version: '16'
+      
+      - name: Debug working directory
+        run: |
+          cd starter/frontend
+          ls -R
+
+# name: Continuous Integration
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'starter/frontend/**'
+#   workflow_dispatch:
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v3
+#         with:
+#           node-version: 16
+      
+#     - name: Debug working directory
+#       run: |
+#         ls -R
 # jobs:
 #   build:
 #     runs-on: ubuntu-latest
