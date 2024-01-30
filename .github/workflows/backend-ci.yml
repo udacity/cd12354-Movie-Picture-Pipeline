@@ -93,6 +93,16 @@ jobs:
         cd starter/backend
         pipenv install
 
+    - name: Install flake8
+      run: |
+        cd starter/backend
+        pipenv run pip install flake8
+
+    - name: Lint Code
+      run: |
+        cd starter/backend
+        pipenv run flake8
+
     - name: Lint Code (Fail Workflow on Lint Failure)
       run: |
         cd starter/backend
