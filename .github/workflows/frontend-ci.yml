@@ -9,6 +9,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  npm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Use correct NVM
+      run: |
+        cd starter/frontend
+        nvm use
+
+    - name: Install Dependencies
+      run: |
+        cd starter/frontend
+        npm ci
+
+    
+  
   lint:
     runs-on: ubuntu-latest
 
@@ -20,12 +44,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-
-    - name: Install Dependencies
-      run: |
-        cd starter/frontend
-        npm install
-
+    
     - name: Lint Code
       run: |
         cd starter/frontend
@@ -46,12 +65,17 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/frontend
-        npm install
+        npm ci
 
     - name: Run Tests
       run: |
         cd starter/frontend
         npm test
+
+    - name: Simulate running tests
+      run: |
+        cd starter/frontend
+        CI=true npm test
 
   build:
     runs-on: ubuntu-latest
@@ -69,10 +93,10 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/frontend
-        npm install
+        npm ci
 
     - name: Build Frontend
       run: |
         cd starter/frontend
-        npm run build
+        REACT_APP_MOVIE_API_URL=http://localhost:5000 npm start
 
