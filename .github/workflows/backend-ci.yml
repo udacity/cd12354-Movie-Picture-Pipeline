@@ -30,7 +30,6 @@ jobs:
       run: |
         cd starter/backend
         pipenv run lint
-        
 
   test:
     runs-on: ubuntu-latest
@@ -44,10 +43,10 @@ jobs:
       with:
         python-version: '3.9'
 
-    # - name: Install Dependencies
-    #   run: |
-    #     cd starter/backend
-    #     pip install -r requirements.txt  # Adjust as needed for your project
+    - name: Install Dependencies
+      run: |
+        cd starter/backend
+        pipenv install
 
     - name: Run Tests
       run: |
@@ -70,90 +69,16 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/backend
-        pipenv run lint
+        pipenv install
 
-    - name: Build backend (Python example)
+    - name: Lint Code (Fail Workflow on Lint Failure)
       run: |
         cd starter/backend
         pipenv run lint-fail
 
+    - name: Build backend (Python example)
+      run: |
+        cd starter/backend
+        ls -R
+
 # Add other steps as needed for your build and test process
-
-# name: Backend CI
-
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#     paths:
-#       - 'starter/backend/**'
-#   workflow_dispatch:
-
-# jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout Repository
-#       uses: actions/checkout@v4
-
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: '20'
-
-#     - name: Install Dependencies
-#       run: |
-#         cd starter/backend
-#         npm install
-
-#     - name: Lint Code
-#       run: |
-#         cd starter/backend
-#         npm run lint
-
-#   test:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout Repository
-#       uses: actions/checkout@v4
-
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: '20'
-
-#     - name: Install Dependencies
-#       run: |
-#         cd starter/backend
-#         npm install
-
-#     - name: Run Tests
-#       run: |
-#         cd starter/backend
-#         npm test
-
-#   build:
-#     runs-on: ubuntu-latest
-#     needs: [lint, test]  # This ensures 'build' only runs if 'lint' and 'test' jobs succeed
-
-#     steps:
-#     - name: Checkout Repository
-#       uses: actions/checkout@v4
-
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: '20'
-
-#     - name: Install Dependencies
-#       run: |
-#         cd starter/backend
-#         npm install
-
-#     - name: Build backend
-#       run: |
-#         cd starter/backend
-#         npm run build
-
