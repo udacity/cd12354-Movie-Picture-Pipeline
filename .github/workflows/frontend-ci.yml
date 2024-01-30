@@ -9,21 +9,78 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: |
+        cd starter/frontend
+        npm install
+
+    - name: Lint Code
+      run: |
+        cd starter/frontend
+        npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: |
+        cd starter/frontend
+        npm install
+
+    - name: Run Tests
+      run: |
+        cd starter/frontend
+        npm test
+
+# Add other steps as needed for your build and test process
+
+# name: Continuous Integration
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'starter/frontend/**'
+#   workflow_dispatch:
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '16'
       
-      - name: Debug working directory
-        run: |
-          cd starter/frontend
-          ls -R
+#       - name: Debug working directory
+#         run: |
+#           cd starter/frontend
+#           ls -R
 
 # name: Continuous Integration
 
