@@ -53,6 +53,32 @@ jobs:
         cd starter/frontend
         npm test
 
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]  # This ensures 'build' only runs if 'lint' and 'test' jobs succeed
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: |
+        cd starter/frontend
+        npm install
+
+    - name: Build Frontend
+      run: |
+        cd starter/frontend
+        npm run build
+
+# Add other steps as needed for your build and test process
+
+
 # Add other steps as needed for your build and test process
 
 # name: Continuous Integration
