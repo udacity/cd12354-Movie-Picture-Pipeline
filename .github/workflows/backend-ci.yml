@@ -24,12 +24,13 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/backend
-        pip install -r requirements.txt  # Adjust as needed for your project
+        pipenv install
 
     - name: Lint Code
       run: |
         cd starter/backend
-        pylint your_module.py  # Adjust as needed for your project structure
+        pipenv run lint
+        
 
   test:
     runs-on: ubuntu-latest
@@ -43,15 +44,15 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install Dependencies
-      run: |
-        cd starter/backend
-        pip install -r requirements.txt  # Adjust as needed for your project
+    # - name: Install Dependencies
+    #   run: |
+    #     cd starter/backend
+    #     pip install -r requirements.txt  # Adjust as needed for your project
 
     - name: Run Tests
       run: |
         cd starter/backend
-        python -m unittest discover tests  # Adjust as needed for your project structure
+        pipenv run test
 
   build:
     runs-on: ubuntu-latest
@@ -69,12 +70,12 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/backend
-        pip install -r requirements.txt  # Adjust as needed for your project
+        pipenv run lint
 
     - name: Build backend (Python example)
       run: |
         cd starter/backend
-        ls -R 
+        pipenv run lint-fail
 
 # Add other steps as needed for your build and test process
 
