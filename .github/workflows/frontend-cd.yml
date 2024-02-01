@@ -15,6 +15,12 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+    
+    - name: Configure AWS Credentials
+        run: |
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.SECRET_KEY }}" >> ~/.aws/credentials
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
@@ -105,6 +111,11 @@ jobs:
       run: |
         cd starter/frontend
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
+
+    - name: Push Image to ECR Docker
+      run: |
+        cd starter/frontend
+        docker push 837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
     - name: Update Kube-config
       run: |
