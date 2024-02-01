@@ -28,11 +28,11 @@ jobs:
         cd starter/frontend
         npm ci
 
-    - name: Configure AWS Credentials
-        run: |
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.SECRET_KEY }}" >> ~/.aws/credentials
+    # - name: Configure AWS Credentials
+    #     run: |
+    #       echo "[default]" > ~/.aws/credentials
+    #       echo "aws_access_key_id=${{ secrets.ACCESS_KEY }}" >> ~/.aws/credentials
+    #       echo "aws_secret_access_key=${{ secrets.SECRET_KEY }}" >> ~/.aws/credentials
 
     
   
