@@ -1,7 +1,7 @@
-name: Frontend CI
+name: Frontend CD
 
 on:
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -21,10 +21,6 @@ jobs:
       with:
         node-version: '20'
     
-    # - name: Use correct NVM
-    #   run: |
-    #     cd starter/frontend
-    #     nvm use
 
     - name: Install Dependencies
       run: |
@@ -54,7 +50,7 @@ jobs:
       run: |
         cd starter/frontend
         npm install eslint --save-dev
-
+        
     - name: Lint Code
       run: |
         cd starter/frontend
@@ -105,8 +101,22 @@ jobs:
         cd starter/frontend
         npm ci
 
-    # - name: Build Frontend
-    #   run: |
-    #     cd starter/frontend
-    #     REACT_APP_MOVIE_API_URL=http://localhost:5000 npm start
+    - name: Build Docker Image
+      run: |
+        cd starter/frontend
+        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
 
+    - name: Update Kube-config
+      run: |
+        cd starter/frontend/k8s
+        aws eks update-kubeconfig
+
+    - name: Deploy to EKS
+      run: |
+        cd starter/frontend/k8s
+        kustomize edit set image frontend=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:0.1
+ 
+    - name: Apply the manifests to the cluster
+      run: |
+        cd starter/frontend/k8s
+        kustomize build | kubectl apply -f -
