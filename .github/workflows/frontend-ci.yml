@@ -1,0 +1,73 @@
+name: Frontend Continuous Integration
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+
+env:
+  NODE_VERSION: '18.x'
+  REACT_APP_MOVIE_API_URL: 'a182fa89525994b498f5792f3eeb78eb-1641643777.us-east-1.elb.amazonaws.com'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          cache: 'npm'
+          cache-dependency-path: "starter/frontend/package-lock.json"
+
+      - name: Lint
+        run: |
+          npm ci
+          npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          cache: 'npm'
+          cache-dependency-path: "starter/frontend/package-lock.json"
+
+      - name: Test
+        run: |
+          npm ci
+          npm run test 
+
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    needs:
+      - lint
+      - test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} -t frontend:${GITHUB_SHA} .
