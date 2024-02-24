@@ -112,8 +112,9 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
       with:
         registry: 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend  # Replace with your ECR registry URL
-        region: us-east-1  # Replace with your AWS region
+          # Replace with your AWS region
       env:
+        AWS_REGION: us-east-1
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
 
