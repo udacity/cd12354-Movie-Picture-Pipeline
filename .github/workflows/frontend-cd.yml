@@ -147,6 +147,5 @@ jobs:
 
 
     - name: Apply the manifests to the cluster
-      run: |
-        cd starter/frontend/k8s
-        kustomize build kustomization.yaml | kubectl apply -f -
+      run: | 
+        kustomize build starter/frontend/k8s/ | kubectl apply -f -
