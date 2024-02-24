@@ -108,9 +108,9 @@ jobs:
     #     cd starter/backend
     #     pipenv run lint-fail
 
-    - name: Build backend (Python example)
+    - name: Build Docker App
       run: |
         cd starter/backend
-        ls -R
+        docker build -t frontend .
 
 # Add other steps as needed for your build and test process
