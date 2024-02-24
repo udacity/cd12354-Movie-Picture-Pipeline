@@ -107,11 +107,20 @@ jobs:
       run: |
         cd starter/frontend
         npm ci
+    
+    - name: AWS ECR Login
+      uses: aws-actions/amazon-ecr-login@v1
+      with:
+        registry: 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend  # Replace with your ECR registry URL
+        region: us-east-1  # Replace with your AWS region
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
 
     - name: Build Docker Image
       run: |
         cd starter/frontend
-        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
+        docker build --build-arg=REACT_APP_MOVIE_API_URL --tag=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
 
     - name: Push Image to ECR Docker
       run: |
@@ -121,12 +130,13 @@ jobs:
     - name: Update Kube-config
       run: |
         cd starter/frontend/k8s
-        aws eks update-kubeconfig
+        aws eks update-kubeconfig --name cluster
 
     - name: Deploy to EKS
       run: |
         cd starter/frontend/k8s
         kustomize edit set image frontend=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:0.1
+
  
     - name: Apply the manifests to the cluster
       run: |
