@@ -134,7 +134,7 @@ jobs:
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
-          
+
     - name: Update Kube-config
       run: |
         cd starter/frontend/k8s
@@ -145,8 +145,8 @@ jobs:
         cd starter/frontend/k8s
         kustomize edit set image frontend=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:0.1
 
- 
+
     - name: Apply the manifests to the cluster
       run: |
         cd starter/frontend/k8s
-        kustomize build | kubectl apply -f - --validate false
+        kustomize build | kubectl apply -f kustomization.yaml --insecure
