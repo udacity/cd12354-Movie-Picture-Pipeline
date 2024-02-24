@@ -144,8 +144,8 @@ jobs:
         aws eks update-kubeconfig --name cluster
     
     - name: Install Kustomize
-      uses: kustodian/setup-kustomize@v3
-          
+      uses: syntaqx/setup-kustomize@v1
+
     - name: Deploy to EKS
       run: |
         cd starter/frontend/k8s
