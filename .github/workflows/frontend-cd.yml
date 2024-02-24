@@ -135,7 +135,7 @@ jobs:
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     
     - name: Kubernetes CLI (kubectl)
-      uses: tale/kubectl-action@v1
+      uses: ThomasKliszowski/setup-kubectl@v1
       
 
     - name: Update Kube-config
