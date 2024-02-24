@@ -135,9 +135,10 @@ jobs:
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     
     - name: Install kubectl
-      uses: steebchen/kubectl@v2
+      uses: azure/k8s-set-context@v1
       with:
-        kubectl-version: "latest"
+        kubectl-version: "1.19.9"
+        kubeconfig: starter/frontend/
       
 
     - name: Update Kube-config
