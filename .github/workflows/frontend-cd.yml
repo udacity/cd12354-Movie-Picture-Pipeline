@@ -108,15 +108,26 @@ jobs:
         cd starter/frontend
         npm ci
     
+    # - name: AWS ECR Login
+    #   uses: aws-actions/amazon-ecr-login@v1
+    #   with:
+    #     registry: 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend  # Replace with your ECR registry URL
+    #       # Replace with your AWS region
+    #   env:
+    #     AWS_REGION: us-east-1
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+
+    - name: Configure AWS CLI
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
+        aws configure set aws_secret_access_key ${{ secrets.SECRET_ACCESS }}
+        aws configure set region us-east-1
+
     - name: AWS ECR Login
       uses: aws-actions/amazon-ecr-login@v1
       with:
-        registry: 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend  # Replace with your ECR registry URL
-          # Replace with your AWS region
-      env:
-        AWS_REGION: us-east-1
-        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+        registry: 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend
 
     - name: Build Docker Image
       run: |
