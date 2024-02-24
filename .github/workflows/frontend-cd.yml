@@ -141,10 +141,10 @@ jobs:
         kubeconfig: starter/frontend/
       
 
-    - name: Update Kube-config
-      run: |
-        cd starter/frontend/k8s
-        aws eks --region us-east-1 update-kubeconfig --name cluster
+    # - name: Update Kube-config
+    #   run: |
+    #     cd starter/frontend/k8s
+    #     aws eks --region us-east-1 update-kubeconfig --name cluster
     
     - name: Install kustomize
       run: |
