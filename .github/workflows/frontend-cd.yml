@@ -149,4 +149,4 @@ jobs:
     - name: Apply the manifests to the cluster
       run: |
         cd starter/frontend/k8s
-        kustomize build | kubectl apply -f - --validate=false
+        kustomize build kustomization.yaml | kubectl apply -f -
