@@ -129,6 +129,7 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 947772818907.dkr.ecr.us-east-1.amazonaws.com
+          cd starter/frontend/
           docker build -t frontend .
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
