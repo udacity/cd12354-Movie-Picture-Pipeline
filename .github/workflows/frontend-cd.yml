@@ -99,27 +99,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
     
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws_access_key_id: ${{ secrets.ACCESS_KEY }}
-        aws_secret_access_key: ${{ secrets.SECRET_ACCESS }}
-        aws-region: us-east-1
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Build, tag, and push image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: frontend
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 947772818907.dkr.ecr.us-east-1.amazonaws.com
-        docker build -t frontend .
-        docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-        docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+   
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
@@ -130,6 +110,28 @@ jobs:
       run: |
         cd starter/frontend
         npm ci
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws_access_key_id: ${{ secrets.ACCESS_KEY }}
+        aws_secret_access_key: ${{ secrets.SECRET_ACCESS }}
+        aws-region: us-east-1
+  
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+  
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: frontend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 947772818907.dkr.ecr.us-east-1.amazonaws.com
+          docker build -t frontend .
+          docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     
     # - name: AWS ECR Login
     #   uses: aws-actions/amazon-ecr-login@v1
