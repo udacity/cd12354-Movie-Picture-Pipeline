@@ -134,17 +134,24 @@ jobs:
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     
-    - name: Kubernetes CLI (kubectl)
-      uses: ThomasKliszowski/setup-kubectl@v1
+    - name: Install kubectl
+      uses: steebchen/kubectl@v2
+      with:
+        kubectl-version: "latest"
       
 
     - name: Update Kube-config
       run: |
         cd starter/frontend/k8s
-        aws eks update-kubeconfig --name cluster
+        aws eks --region us-east-1 update-kubeconfig --name cluster
     
-    - name: Install Kustomize
-      uses: syntaqx/setup-kustomize@v1
+    - name: Install kustomize
+      run: |
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin/    
+
+    # - name: Install Kustomize
+    #   uses: syntaqx/setup-kustomize@v1
 
     - name: Deploy to EKS
       run: |
