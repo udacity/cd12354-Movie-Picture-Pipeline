@@ -133,7 +133,10 @@ jobs:
           docker build -t frontend .
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-
+    
+    - name: Kubernetes CLI (kubectl)
+      uses: tale/kubectl-action@v1
+      
 
     - name: Update Kube-config
       run: |
@@ -143,7 +146,7 @@ jobs:
     - name: Deploy to EKS
       run: |
         cd starter/frontend/k8s
-        kustomize edit set image frontend=837520400973.dkr.ecr.us-east-1.amazonaws.com/frontend:0.1
+        kustomize edit set image frontend=947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
 
     - name: Apply the manifests to the cluster
