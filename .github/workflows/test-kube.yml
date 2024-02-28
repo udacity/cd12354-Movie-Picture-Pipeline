@@ -1,0 +1,36 @@
+name: Test Kube
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+   
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    
+    - name: Install kubectl
+      uses: azure/k8s-set-context@v1
+      with:
+        kubectl-version: "1.19.9"
+        kubeconfig: starter/frontend/
+    
+    - name: Update kubeconfig
+      run: kubectl config view --flatten > $KUBECONFIG
+      
+
+    # - name: Update Kube-config
+    #   run: |
+    #     cd starter/frontend/k8s
+    #     aws eks --region us-east-1 update-kubeconfig --name cluster
