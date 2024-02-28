@@ -23,7 +23,7 @@ jobs:
     - name: Install kubectl
       uses: azure/k8s-set-context@v1
       with:
-        kubectl-version: "1.19.9"
+        version: "1.19.9"
         kubeconfig: starter/frontend/
     
     - name: Check kubectl version
