@@ -184,7 +184,7 @@ jobs:
 
     - name: Install and configure aws-iam-authenticator
       run: |
-        curl -sS -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
+        curl -X GET -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.2/aws-iam-authenticator_0.6.2_linux_amd64 -o aws-iam-authenticator
         chmod +x ./aws-iam-authenticator
         sudo mv ./aws-iam-authenticator /usr/local/bin        
        
