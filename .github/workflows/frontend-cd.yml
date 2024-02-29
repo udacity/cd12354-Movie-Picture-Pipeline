@@ -155,6 +155,12 @@ jobs:
     - name: Check Kustomize version
       run: kustomize version
 
+    - name: Update AWS CLI
+      run: |
+        sudo apt-get install -y awscli
+        aws --version
+    
+
     - name: Add AWS EKS cluster to kubeconfig
       run: |
         # Specify AWS EKS cluster details
@@ -176,6 +182,9 @@ jobs:
 
       env:
         KUBECONFIG: /home/runner/.kube/config
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
     # - name: Get Pods
     #   run: |
