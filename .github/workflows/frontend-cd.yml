@@ -184,7 +184,7 @@ jobs:
 
     - name: Install and configure aws-iam-authenticator
       run: |
-        curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
+        curl -sS -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
         chmod +x ./aws-iam-authenticator
         sudo mv ./aws-iam-authenticator /usr/local/bin        
        
@@ -200,7 +200,7 @@ jobs:
 
     - name: Add user to Kubernetes
       run: |
-        ls -las
+        aws-iam-authenticator help
         aws-iam-authenticator version
 
 
