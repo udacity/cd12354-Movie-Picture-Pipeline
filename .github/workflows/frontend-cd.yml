@@ -185,7 +185,8 @@ jobs:
     - name: Install and configure aws-iam-authenticator
       run: |
         curl -X GET -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.2/aws-iam-authenticator_0.6.2_linux_amd64 -o aws-iam-authenticator
-        chmod +x aws-iam-authenticator       
+        chmod +x aws-iam-authenticator
+        pwd       
        
 
       env:
@@ -200,7 +201,7 @@ jobs:
     - name: Add user to Kubernetes
       run: |
         aws-iam-authenticator help
-        aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+        # aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
 
 
