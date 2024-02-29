@@ -155,20 +155,20 @@ jobs:
     - name: Check Kustomize version
       run: kustomize version
 
-    # - name: Add AWS EKS cluster to kubeconfig
-    #   run: |
-    #     # Specify AWS EKS cluster details
-    #     AWS_REGION=us-east-1
-    #     EKS_CLUSTER_NAME=cluster
+    - name: Add AWS EKS cluster to kubeconfig
+      run: |
+        # Specify AWS EKS cluster details
+        AWS_REGION=us-east-1
+        EKS_CLUSTER_NAME=cluster
 
-    #     # Update kubeconfig with AWS EKS cluster
-    #     aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG
+        # Update kubeconfig with AWS EKS cluster
+        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG
 
-    #     # Display the updated kubeconfig content (optional, for verification)
-    #     cat $KUBECONFIG
+        # Display the updated kubeconfig content (optional, for verification)
+        cat $KUBECONFIG
 
-    #     env:
-    #     KUBECONFIG: /home/runner/work/_temp/kubeconfig_${{ github.run_id }}
+        env:
+        KUBECONFIG: /home/runner/work/_temp/kubeconfig_${{ github.run_id }}
     
     # - name: Install kubectl
     #   uses: azure/k8s-set-context@v1
