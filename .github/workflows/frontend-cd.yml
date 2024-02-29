@@ -162,7 +162,7 @@ jobs:
         EKS_CLUSTER_NAME=cluster
 
         # Set the path for the kubeconfig file
-        KUBECONFIG_PATH=/home/runner/work/_temp/kubeconfig_${{ github.run_id }}
+        KUBECONFIG_PATH=/home/runner/home/runner/.kube/
 
         # Update kubeconfig with AWS EKS cluster
         aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} 
@@ -172,7 +172,7 @@ jobs:
         cat $KUBECONFIG_PATH
 
         env:
-        KUBECONFIG: /home/runner/work/_temp/kubeconfig_${{ github.run_id }}
+        KUBECONFIG: /home/runner/.kube/
     
     # - name: Install kubectl
     #   uses: azure/k8s-set-context@v1
