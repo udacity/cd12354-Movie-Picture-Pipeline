@@ -172,7 +172,7 @@ jobs:
         cat $KUBECONFIG_PATH
 
         env:
-        KUBECONFIG: /home/runner/.kube/
+        KUBECONFIG: /home/runner/.kube/config
     
     # - name: Install kubectl
     #   uses: azure/k8s-set-context@v1
