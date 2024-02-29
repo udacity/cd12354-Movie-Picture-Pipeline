@@ -198,13 +198,8 @@ jobs:
         echo "::set-output name=userarn::$userarn"
 
     - name: Add user to Kubernetes
-      run: |
-        sudo /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user \
-          --userarn="${{ steps.fetch-user-arn.outputs.userarn }}" \
-          --username=github-action-role \
-          --groups=system:masters \
-          --kubeconfig=/home/runner/.kube/config \
-          --prompt=false
+      run: /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig="$HOME"/.kube/config --prompt=false
+
 
       env:
         KUBECONFIG: /home/runner/.kube/config
