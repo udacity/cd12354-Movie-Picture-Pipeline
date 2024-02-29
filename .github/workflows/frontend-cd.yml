@@ -160,11 +160,11 @@ jobs:
         sudo apt-get install -y awscli
         aws --version
 
-        - name: Install and configure aws-iam-authenticator
-        run: |
-          curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
-          chmod +x aws-iam-authenticator
-          sudo mv aws-iam-authenticator /usr/local/bin/
+    - name: Install and configure aws-iam-authenticator
+      run: |
+        curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
+        chmod +x aws-iam-authenticator
+        sudo mv aws-iam-authenticator /usr/local/bin/
   
     - name: Fetch IAM GitHub Action user ARN
       id: fetch-user-arn
