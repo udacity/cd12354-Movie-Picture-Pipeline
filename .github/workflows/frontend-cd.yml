@@ -133,15 +133,51 @@ jobs:
           docker build -t frontend .
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-    
+
     - name: Install kubectl
-      uses: azure/k8s-set-context@v1
-      with:
-        kubectl-version: "1.19.9"
-        kubeconfig: starter/frontend/
+      run: |
+        curl -sLO https://storage.googleapis.com/kubernetes-release/release/v1.19.9/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/
     
-    - name: Update kubeconfig
-      run: kubectl config view --flatten > $KUBECONFIG
+    - name: Check kubectl version
+      run: kubectl version --client
+        
+    - name: Display kubectl help
+      run: kubectl help
+    
+    - name: Install Kustomize
+      run: |
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin/
+    
+
+    - name: Check Kustomize version
+      run: kustomize version
+
+    # - name: Add AWS EKS cluster to kubeconfig
+    #   run: |
+    #     # Specify AWS EKS cluster details
+    #     AWS_REGION=us-east-1
+    #     EKS_CLUSTER_NAME=cluster
+
+    #     # Update kubeconfig with AWS EKS cluster
+    #     aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG
+
+    #     # Display the updated kubeconfig content (optional, for verification)
+    #     cat $KUBECONFIG
+
+    #     env:
+    #     KUBECONFIG: /home/runner/work/_temp/kubeconfig_${{ github.run_id }}
+    
+    # - name: Install kubectl
+    #   uses: azure/k8s-set-context@v1
+    #   with:
+    #     kubectl-version: "1.19.9"
+    #     kubeconfig: starter/frontend/
+    
+    # - name: Update kubeconfig
+    #   run: kubectl config view --flatten > $KUBECONFIG
       
 
     # - name: Update Kube-config
@@ -149,10 +185,10 @@ jobs:
     #     cd starter/frontend/k8s
     #     aws eks --region us-east-1 update-kubeconfig --name cluster
     
-    - name: Install kustomize
-      run: |
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-        sudo mv kustomize /usr/local/bin/    
+    # - name: Install kustomize
+    #   run: |
+    #     curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+    #     sudo mv kustomize /usr/local/bin/    
 
     # - name: Install Kustomize
     #   uses: syntaqx/setup-kustomize@v1
