@@ -186,6 +186,7 @@ jobs:
       run: |
         curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
         chmod +x aws-iam-authenticator
+        ls -las
 
       env:
         KUBECONFIG: /home/runner/.kube/config
@@ -198,7 +199,7 @@ jobs:
 
     - name: Add user to Kubernetes
       run: |
-        sudo aws-iam-authenticator add user \
+        sudo ./aws-iam-authenticator add user \
           --userarn="${{ steps.fetch-user-arn.outputs.userarn }}" \
           --username=github-action-role \
           --groups=system:masters \
