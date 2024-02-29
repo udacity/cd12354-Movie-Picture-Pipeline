@@ -174,10 +174,29 @@ jobs:
       env:
         KUBECONFIG: /home/runner/.kube/config
 
-    - name: Update Kube-config
-      run: kubectl get pods
-      env:
-        KUBECONFIG: /home/runner/.kube/config
+    - name: Get Pods
+      run: |
+        # Specify AWS EKS cluster details
+        AWS_REGION=us-east-1
+        EKS_CLUSTER_NAME=cluster
+
+        # Set the path for the kubeconfig file
+        KUBECONFIG_PATH=/home/runner/.kube/config
+
+        # Update kubeconfig with AWS EKS cluster
+          kubectl get pods
+        
+
+        # Display the updated kubeconfig content (optional, for verification)
+        cat $KUBECONFIG_PATH
+
+    env:
+      KUBECONFIG: /home/runner/.kube/config
+
+    # - name: Update Kube-config
+    #   run: kubectl get pods
+    #   env:
+    #     KUBECONFIG: /home/runner/.kube/config
     
     # - name: Install kubectl
     #   uses: azure/k8s-set-context@v1
