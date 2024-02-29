@@ -171,7 +171,7 @@ jobs:
         # Display the updated kubeconfig content (optional, for verification)
         cat $KUBECONFIG_PATH
 
-        env:
+      env:
         KUBECONFIG: /home/runner/.kube/config
     
     # - name: Install kubectl
