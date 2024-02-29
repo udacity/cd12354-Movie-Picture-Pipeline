@@ -200,8 +200,9 @@ jobs:
 
     - name: Add user to Kubernetes
       run: |
-        aws-iam-authenticator help
-        aws-iam-authenticator version
+        ./aws-iam-authenticator help
+        ./aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+
 
 
       env:
