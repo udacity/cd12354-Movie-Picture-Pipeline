@@ -161,6 +161,9 @@ jobs:
         AWS_REGION=us-east-1
         EKS_CLUSTER_NAME=cluster
 
+        # Set the path for the kubeconfig file
+        KUBECONFIG_PATH=/home/runner/work/_temp/kubeconfig_${{ github.run_id }}
+
         # Update kubeconfig with AWS EKS cluster
         aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG
 
