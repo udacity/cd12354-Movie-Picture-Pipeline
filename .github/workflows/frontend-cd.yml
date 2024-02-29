@@ -176,6 +176,8 @@ jobs:
 
     - name: Update Kube-config
       run: kubectl get pods
+      env:
+        KUBECONFIG: /home/runner/.kube/config
     
     # - name: Install kubectl
     #   uses: azure/k8s-set-context@v1
