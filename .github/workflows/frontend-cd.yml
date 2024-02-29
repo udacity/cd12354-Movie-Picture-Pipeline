@@ -184,9 +184,11 @@ jobs:
 
     - name: Install and configure aws-iam-authenticator
       run: |
-        curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
-        chmod +x /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator
-        pwd
+        curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
+        chmod +x ./aws-iam-authenticator
+        sudo mv ./aws-iam-authenticator /usr/local/bin        
+        cat /usr/local/bin
+        cat /etc/os-release/
 
       env:
         KUBECONFIG: /home/runner/.kube/config
@@ -200,7 +202,8 @@ jobs:
     - name: Add user to Kubernetes
       run: |
         ls -las
-        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+        aws-iam-authenticator help
+        aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
 
       env:
