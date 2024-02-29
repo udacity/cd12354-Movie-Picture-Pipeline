@@ -2,10 +2,10 @@ name: Frontend CD
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'starter/frontend/**'
+    # branches:
+    #   - main
+    # paths:
+    #   - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -162,7 +162,7 @@ jobs:
         EKS_CLUSTER_NAME=cluster
 
         # Set the path for the kubeconfig file
-        KUBECONFIG_PATH=/home/runner/home/runner/.kube/config
+        KUBECONFIG_PATH=/home/runner/.kube/config
 
         # Update kubeconfig with AWS EKS cluster
         aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} 
