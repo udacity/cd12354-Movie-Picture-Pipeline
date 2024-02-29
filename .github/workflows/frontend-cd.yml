@@ -165,10 +165,11 @@ jobs:
         KUBECONFIG_PATH=/home/runner/work/_temp/kubeconfig_${{ github.run_id }}
 
         # Update kubeconfig with AWS EKS cluster
-        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG
+        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} 
+        
 
         # Display the updated kubeconfig content (optional, for verification)
-        cat $KUBECONFIG
+        cat $KUBECONFIG_PATH
 
         env:
         KUBECONFIG: /home/runner/work/_temp/kubeconfig_${{ github.run_id }}
