@@ -159,7 +159,29 @@ jobs:
       run: |
         sudo apt-get install -y awscli
         aws --version
-    
+
+        - name: Install and configure aws-iam-authenticator
+        run: |
+          curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
+          chmod +x aws-iam-authenticator
+          sudo mv aws-iam-authenticator /usr/local/bin/
+  
+    - name: Fetch IAM GitHub Action user ARN
+      id: fetch-user-arn
+      run: |
+        userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
+        echo "::set-output name=userarn::$userarn"
+
+    - name: Add user to Kubernetes
+      run: |
+        sudo aws-iam-authenticator add user \
+          --userarn="${{ steps.fetch-user-arn.outputs.userarn }}" \
+          --username=github-action-role \
+          --groups=system:masters \
+          --kubeconfig=$HOME/.kube/config \
+          --prompt=false
+
+      
 
     - name: Add AWS EKS cluster to kubeconfig
       run: |
@@ -182,9 +204,9 @@ jobs:
 
       env:
         KUBECONFIG: /home/runner/.kube/config
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # aws-region: us-east-1
 
     # - name: Get Pods
     #   run: |
