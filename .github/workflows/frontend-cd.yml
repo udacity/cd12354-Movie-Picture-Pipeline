@@ -185,7 +185,7 @@ jobs:
     - name: Install and configure aws-iam-authenticator
       run: |
         curl -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator -o aws-iam-authenticator
-        chmod +x aws-iam-authenticator
+        chmod +x /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator
         pwd
 
       env:
@@ -199,7 +199,7 @@ jobs:
 
     - name: Add user to Kubernetes
       run: |
-        sudo ./aws-iam-authenticator add user \
+        sudo /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user \
           --userarn="${{ steps.fetch-user-arn.outputs.userarn }}" \
           --username=github-action-role \
           --groups=system:masters \
