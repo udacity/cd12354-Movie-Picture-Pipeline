@@ -171,27 +171,31 @@ jobs:
         # Display the updated kubeconfig content (optional, for verification)
         cat $KUBECONFIG_PATH
 
+        # Update kubeconfig with AWS EKS cluster
+        kubectl get pods
+
       env:
         KUBECONFIG: /home/runner/.kube/config
 
-    - name: Get Pods
-      run: |
-        # Specify AWS EKS cluster details
-        AWS_REGION=us-east-1
-        EKS_CLUSTER_NAME=cluster
+    # - name: Get Pods
+    #   run: |
+    #     # Specify AWS EKS cluster details
+    #     AWS_REGION=us-east-1
+    #     EKS_CLUSTER_NAME=cluster
 
-        # Set the path for the kubeconfig file
-        KUBECONFIG_PATH=/home/runner/.kube/config
+    #     # Set the path for the kubeconfig file
+    #     KUBECONFIG_PATH=/home/runner/.kube/config
 
-        # Update kubeconfig with AWS EKS cluster
-          kubectl get pods
-        
+    #     export AWS_DEFAULT_REGION=$AWS_REGION
+    #     export AWS_REGION=$AWS_REGION
+    #     export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-        # Display the updated kubeconfig content (optional, for verification)
-        cat $KUBECONFIG_PATH
+    #     # Update kubeconfig with AWS EKS cluster
+    #       kubectl get pods
 
-    env:
-      KUBECONFIG: /home/runner/.kube/config
+    # env:
+    #   KUBECONFIG: /home/runner/.kube/config
 
     # - name: Update Kube-config
     #   run: kubectl get pods
