@@ -170,7 +170,7 @@ jobs:
         KUBECONFIG_PATH=/home/runner/.kube/config
 
         # Update kubeconfig with AWS EKS cluster
-        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} 
+        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
         
 
         # Display the updated kubeconfig content (optional, for verification)
@@ -188,16 +188,14 @@ jobs:
       env:
         KUBECONFIG: /home/runner/.kube/config
   
-    # - name: Fetch IAM GitHub Action user ARN
-    #   id: fetch-user-arn
-    #   run: |
-    #     userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-    #     echo "::set-output name=userarn::$userarn"
+    - name: Fetch IAM GitHub Action user ARN
+      id: fetch-user-arn
+      run: |
+        userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
+        echo "::set-output name=userarn::$userarn"
 
     - name: Add user to Kubernetes
       run: |
-        userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-        # /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator help
         /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
       env:
