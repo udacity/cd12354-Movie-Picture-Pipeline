@@ -197,7 +197,7 @@ jobs:
     - name: Add user to Kubernetes
       run: |
         userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator help
+        # /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator help
         /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
       env:
