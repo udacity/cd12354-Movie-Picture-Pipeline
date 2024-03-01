@@ -192,11 +192,11 @@ jobs:
       id: fetch-user-arn
       run: |
         userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-        echo "::set-output name=userarn::$userarn"
+        echo $userarn
 
     - name: Add user to Kubernetes
       run: |
-        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn=$userarn --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
       env:
         KUBECONFIG: /home/runner/.kube/config
