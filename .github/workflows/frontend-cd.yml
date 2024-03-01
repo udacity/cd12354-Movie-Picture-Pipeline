@@ -200,6 +200,7 @@ jobs:
 
       env:
         KUBECONFIG: /home/runner/.kube/config
+        userarn: ${{ steps.fetch-user-arn.outputs.userarn }}
 
       
 
