@@ -197,10 +197,6 @@ jobs:
 
         aws configure list
 
-
-    
-    - name: Add user to Kubernetes
-      run: |
         userarn="${{ steps.fetch-user-arn.outputs.userarn }}"
         if [ -z "$userarn" ]; then
           echo "Error: userARN is empty."
@@ -213,7 +209,26 @@ jobs:
       KUBECONFIG: /home/runner/.kube/config
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-east-1
+
+
+
+    
+    # - name: Add user to Kubernetes
+    #   run: |
+    #     userarn="${{ steps.fetch-user-arn.outputs.userarn }}"
+    #     if [ -z "$userarn" ]; then
+    #       echo "Error: userARN is empty."
+    #       exit 1
+    #     fi
+    
+    #     /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="$userarn" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+    
+    # env:
+    #   KUBECONFIG: /home/runner/.kube/config
+    #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #   AWS_REGION: us-east-1
 
     # - name: Add user to Kubernetes
     #   run: |
