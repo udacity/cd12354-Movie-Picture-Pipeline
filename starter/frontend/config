@@ -1,0 +1,40 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJZHBvbDVSczYwc1V3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBeU1qUXdNVFF5TkRkYUZ3MHpOREF5TWpFd01UUTNORGRhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURuU3dETC90anVnYzJIZWY2anZwODB1Y0hHb3JoZmgzRUx4dDlmNjF3VU9XWFRaWHViOWo0bTBmcDcKbGdISDdDUEJxc1F2M0lCOW5HQWs2bm5rcmJacFpMSThSajJmbnN0aUNVRmVFUDZmMUxxd3ExZkM4NStackpoYwozNjRxclV6Rjhud3JLbHV1ejYyUE1Ib0lEOEdQM24weVpkMTFFMkxTUll5YWNpMUNSVmtsZzdmT2d2N3pMNmFwCnRwelp2Y3hubUR3eXR1Rk1FTXVZVWRUNk1YNXZNVTZoZXpuN2R0cCtncnRVd0JnRFZ0RkRuSFIwaFc2cDJMdzUKU2FHVXFieW9mTDdGWEVjYjl2dkVIUFljOWUrUTRoQ0ZKZmNhS3FRc2tDc3hrcTRydmFLZ2t5MDZBM0tRR29KWApMaTYxWWRONTZwQWRXVEl2VFRCeGlBYzYrNk9iQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTTlAvWEZNb3FmdCs3UmZYUlhnTHJOTENPeGN6QVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRRFNsa2gvMS83dAptWXpZNStGWG5GVlJGejdpMVNaeHl2WkdIcm9NcXRuZDN6SWJwV3ZsREZNQUZ4M3E4V3NFcnNMb3YvRnZ6T1Y4CmJEYlZjM2dlcWEzTTRIRmhYMlpXMDZnY0NCM3JsVEU5ZVZsdGpVczhWc1V4cEp6N3VYV1ZaMlQ1V0VVTWhRVDEKQVFDMVNnQThJRC9zTXIvREZHWWJIdDkrMnYyNHUzL0ZxOFJQdEU2MUt6M05mb2F5ZU54L2VTZEFwdWtVNy8rUgpQWU90TGh6WXFyekpJUmVvMXBKTnh6QldCSXMxWFVaajBZZXlIenpJamg1ekRsZjNuZ1NrbmpBMnBrZjlrTDNuCm9GWm4rbTdqbGl5UWVTRUFoVlNIV1ppcnFHcXpqaG9yZ2lPb0dlYVRla0tiSnUzcGNreFA2V2QvVlNjT0xpUEIKUGxHV2FGQVB4bVhGCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    server: https://DF43D79A50C08CBF46DDC64893292782.gr7.us-east-1.eks.amazonaws.com
+  name: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+contexts:
+- context:
+    cluster: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+    user: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+  name: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+current-context: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+kind: Config
+preferences: {}
+users:
+- name: github-action-role
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - token
+      - -i
+      - cluster
+      command: aws-iam-authenticator
+      env: null
+      provideClusterInfo: false
+- name: arn:aws:eks:us-east-1:947772818907:cluster/cluster
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - --region
+      - us-east-1
+      - eks
+      - get-token
+      - --cluster-name
+      - cluster
+      - --output
+      - json
+      command: aws
