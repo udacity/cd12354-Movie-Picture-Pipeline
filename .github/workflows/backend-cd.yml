@@ -2,10 +2,10 @@ name: Backend CD
 
 on:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - 'starter/backend/**'
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
   workflow_dispatch:
 
 jobs:
@@ -91,17 +91,7 @@ jobs:
     - name: Install Dependencies
       run: |
         cd starter/backend
-        pipenv install
-
-    # - name: Install flake8
-    #   run: |
-    #     cd starter/backend
-    #     pipenv run pip install flake8
-
-    # - name: Lint Code
-    #   run: |
-    #     cd starter/backend
-    #     pipenv run flake8
+        pipenv installku
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4

@@ -2,10 +2,10 @@ name: Frontend CD
 
 on:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - 'starter/frontend/**'
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -27,13 +27,6 @@ jobs:
       run: |
         cd starter/frontend
         npm ci
-
-    # - name: Configure AWS Credentials
-    #     run: |
-    #       echo "[default]" > ~/.aws/credentials
-    #       echo "aws_access_key_id=${{ secrets.ACCESS_KEY }}" >> ~/.aws/credentials
-    #       echo "aws_secret_access_key=${{ secrets.SECRET_KEY }}" >> ~/.aws/credentials
-
     
   
   lint:
@@ -92,7 +85,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    # environment: test
     needs: [lint, test]  # This ensures 'build' only runs if 'lint' and 'test' jobs succeed
 
     steps:
@@ -130,7 +122,7 @@ jobs:
       run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 947772818907.dkr.ecr.us-east-1.amazonaws.com
           cd starter/frontend/
-          docker build -t frontend .
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 -t frontend .
           docker tag frontend:latest 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
