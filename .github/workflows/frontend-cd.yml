@@ -159,26 +159,29 @@ jobs:
       run: |
         sudo apt-get install -y awscli
         aws --version
-        kubectl get pods
+  
 
-    # - name: Add AWS EKS cluster to kubeconfig
-    #   run: |
-    #     # Specify AWS EKS cluster details
-    #     AWS_REGION=us-east-1
-    #     EKS_CLUSTER_NAME=cluster
+    - name: Add AWS EKS cluster to kubeconfig
+      run: |
+        # Specify AWS EKS cluster details
+        AWS_REGION=us-east-1
+        EKS_CLUSTER_NAME=cluster
 
-    #     # Set the path for the kubeconfig file
-    #     KUBECONFIG_PATH=/home/runner/.kube/config
+        # Set the path for the kubeconfig file
+        KUBECONFIG_PATH=/home/runner/.kube/config
 
-    #     # Update kubeconfig with AWS EKS cluster
-    #     aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
+        # Update kubeconfig with AWS EKS cluster
+        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
         
 
-    #     # Display the updated kubeconfig content (optional, for verification)
-    #     cat $KUBECONFIG_PATH
+        # Display the updated kubeconfig content (optional, for verification)
+        cat $KUBECONFIG_PATH
 
-    #   env:
-    #     KUBECONFIG: /home/runner/.kube/config
+      env:
+        KUBECONFIG: /home/runner/.kube/config
+
+    - name: Check kubectl commands
+      run: kubectl get pods
 
     # - name: Install and configure aws-iam-authenticator
     #   run: |
