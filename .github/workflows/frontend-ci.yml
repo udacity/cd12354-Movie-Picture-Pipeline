@@ -110,8 +110,4 @@ jobs:
         cd starter/frontend
         npm run test
 
-    # - name: Build Frontend
-    #   run: |
-    #     cd starter/frontend
-    #     REACT_APP_MOVIE_API_URL=http://localhost:5000 npm start
 
