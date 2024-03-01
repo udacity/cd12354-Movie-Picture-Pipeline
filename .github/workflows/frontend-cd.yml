@@ -192,15 +192,29 @@ jobs:
       id: fetch-user-arn
       run: |
         userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-        echo $userarn
+        echo "UserARN: $userarn"
+        echo "::set-output name=userarn::$userarn"
 
+    
     - name: Add user to Kubernetes
       run: |
-        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn=$userarn --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+        userarn="${{ steps.fetch-user-arn.outputs.userarn }}"
+        if [ -z "$userarn" ]; then
+          echo "Error: userARN is empty."
+          exit 1
+        fi
+    
+        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="$userarn" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+    
+    env:
+      KUBECONFIG: /home/runner/.kube/config
 
-      env:
-        KUBECONFIG: /home/runner/.kube/config
-        userarn: ${{ steps.fetch-user-arn.outputs.userarn }}
+    # - name: Add user to Kubernetes
+    #   run: |
+    #     /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn=$userarn --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+
+    #   env:
+    #     KUBECONFIG: /home/runner/.kube/config
 
       
 
