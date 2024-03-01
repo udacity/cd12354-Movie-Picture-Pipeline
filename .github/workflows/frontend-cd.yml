@@ -159,50 +159,51 @@ jobs:
       run: |
         sudo apt-get install -y awscli
         aws --version
+        kubectl get pods
 
-    - name: Add AWS EKS cluster to kubeconfig
-      run: |
-        # Specify AWS EKS cluster details
-        AWS_REGION=us-east-1
-        EKS_CLUSTER_NAME=cluster
+    # - name: Add AWS EKS cluster to kubeconfig
+    #   run: |
+    #     # Specify AWS EKS cluster details
+    #     AWS_REGION=us-east-1
+    #     EKS_CLUSTER_NAME=cluster
 
-        # Set the path for the kubeconfig file
-        KUBECONFIG_PATH=/home/runner/.kube/config
+    #     # Set the path for the kubeconfig file
+    #     KUBECONFIG_PATH=/home/runner/.kube/config
 
-        # Update kubeconfig with AWS EKS cluster
-        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
+    #     # Update kubeconfig with AWS EKS cluster
+    #     aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
         
 
-        # Display the updated kubeconfig content (optional, for verification)
-        cat $KUBECONFIG_PATH
+    #     # Display the updated kubeconfig content (optional, for verification)
+    #     cat $KUBECONFIG_PATH
 
-      env:
-        KUBECONFIG: /home/runner/.kube/config
+    #   env:
+    #     KUBECONFIG: /home/runner/.kube/config
 
-    - name: Install and configure aws-iam-authenticator
-      run: |
-        curl -X GET -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.2/aws-iam-authenticator_0.6.2_linux_amd64 -o aws-iam-authenticator
-        chmod +x /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator
-        pwd       
+    # - name: Install and configure aws-iam-authenticator
+    #   run: |
+    #     curl -X GET -L https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.2/aws-iam-authenticator_0.6.2_linux_amd64 -o aws-iam-authenticator
+    #     chmod +x /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator
+    #     pwd       
 
-      env:
-        KUBECONFIG: /home/runner/.kube/config
+    #   env:
+    #     KUBECONFIG: /home/runner/.kube/config
   
-    - name: Fetch IAM GitHub Action user ARN
-      id: fetch-user-arn
-      run: |
-        userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
-        echo "UserARN: $userarn"
-        echo "::set-output name=userarn::$userarn"
-        /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="$userarn" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
+    # - name: Fetch IAM GitHub Action user ARN
+    #   id: fetch-user-arn
+    #   run: |
+    #     userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
+    #     echo "UserARN: $userarn"
+    #     echo "::set-output name=userarn::$userarn"
+    #     /home/runner/work/cd12354-Movie-Picture-Pipeline/cd12354-Movie-Picture-Pipeline/aws-iam-authenticator add user --userarn="$userarn" --username=github-action-role --groups=system:masters --kubeconfig=/home/runner/.kube/config --prompt=false
 
-        aws configure list
+    #     aws configure list
     
-      env:
-        KUBECONFIG: /home/runner/.kube/config
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1
+    #   env:
+    #     KUBECONFIG: /home/runner/.kube/config
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     AWS_REGION: us-east-1
 
 
       # userarn="${{ steps.fetch-user-arn.outputs.userarn }}"
