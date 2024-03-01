@@ -293,13 +293,13 @@ jobs:
     # - name: Install Kustomize
     #   uses: syntaqx/setup-kustomize@v1
 
-    # - name: Deploy to EKS
-    #   run: |
-    #     cd starter/frontend/k8s
-    #     kustomize edit set image frontend=947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+    - name: Deploy to EKS
+      run: |
+        cd starter/frontend/k8s
+        kustomize edit set image frontend=947772818907.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
 
-    # - name: Apply the manifests to the cluster
-    #   run: |
-    #     cd starter/frontend/k8s
-    #     kustomize build | kubectl apply -f - --validate=false
+    - name: Apply the manifests to the cluster
+      run: |
+        cd starter/frontend/k8s
+        kustomize build | kubectl apply -f - --validate=false
