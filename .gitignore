@@ -5,3 +5,5 @@ node_modules
 *.tfstate.backup
 credentials
 .pytest_cache
+.DS_Store
+**/.DS_Store
