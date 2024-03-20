@@ -24,7 +24,7 @@ jobs:
       - name: Prepare Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{env.NODE_VERSION}}
+          python-version: ${{env.PYTHON_VERSION}}
           cache: 'pipenv'
           cache-dependency-path: starter/backend/Pipfile.lock
 
@@ -47,7 +47,7 @@ jobs:
       - name: Prepare Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{env.NODE_VERSION}}
+          python-version: ${{env.PYTHON_VERSION}}
           cache: 'pipenv'
           cache-dependency-path: starter/backend/Pipfile.lock
 
