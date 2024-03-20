@@ -2,7 +2,7 @@ name: Frontend Continuous Deployment
 on:
   workflow_dispatch:
 
-  merge:
+  push:
     branches:
       - main
 
