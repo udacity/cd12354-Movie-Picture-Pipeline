@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+          cache-dependency-path: ${{GITHUB_WORKSPACE}}/starter/frontend
 
       - name: Lint
         run: |
@@ -48,6 +49,7 @@ jobs:
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+          cache-dependency-path: ${{GITHUB_WORKSPACE}}/starter/frontend
 
       - name: Test
         run: |
@@ -67,6 +69,7 @@ jobs:
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+          cache-dependency-path: ${{GITHUB_WORKSPACE}}/starter/frontend
 
       - name: Build
         run: |
