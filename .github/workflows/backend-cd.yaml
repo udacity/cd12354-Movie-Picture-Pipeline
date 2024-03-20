@@ -85,5 +85,5 @@ jobs:
           file: starter/backend/Dockerfile
           push: true
           tags:
-            - ${{ env.GITHUB_SHA }}
+            - ${{ github.sha }}
             - latest
