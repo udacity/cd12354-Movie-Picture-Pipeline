@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
@@ -58,10 +58,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
