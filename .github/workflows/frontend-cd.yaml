@@ -77,6 +77,6 @@ jobs:
           file: starter/frontend/Dockerfile
           build-args: REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }}
           push: true
-          tags: mp-frontend:${{ github.sha }},mp-frontend:latest
+          tags: ${{ env.AWS_ECR_REGISTRY }}/frontend:${{ github.sha }},${{ env.AWS_ECR_REGISTRY }}/frontend:latest
 
 

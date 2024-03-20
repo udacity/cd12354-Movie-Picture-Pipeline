@@ -84,4 +84,4 @@ jobs:
           context: starter/backend
           file: starter/backend/Dockerfile
           push: true
-          tags: mp-backend:${{ github.sha }},mp-backend:latest
+          tags: ${{ env.AWS_ECR_REGISTRY }}/backend:${{ github.sha }},${{ env.AWS_ECR_REGISTRY }}/backend:latest
