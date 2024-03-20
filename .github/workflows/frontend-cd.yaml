@@ -75,11 +75,10 @@ jobs:
         with:
           context: starter/frontend
           file: starter/frontend/Dockerfile
-          build-args:
-            - REACT_APP_MOVIE_API_URL: ${{ env.REACT_APP_MOVIE_API_URL }}
+          build-args: REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }}
           push: true
           tags:
-            - ${{ github.sha }}
-            - latest
+            - mp-frontend:${{ github.sha }}
+            - mp-frontend:latest
 
 
