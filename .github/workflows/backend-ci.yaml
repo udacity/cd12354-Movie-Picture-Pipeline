@@ -1,0 +1,79 @@
+name: Backend Continuous Integration
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - main
+
+env:
+  PYTHON_VERSION: '>=3.10'
+
+defaults:
+  run:
+    working-directory: starter/backend
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{env.NODE_VERSION}}
+          cache: 'pipenv'
+          cache-dependency-path: starter/backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+      - name: Install Python Dependencies
+        run: pipenv install
+
+      - name: Lint
+        run: pipenv run test
+
+  backend-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{env.NODE_VERSION}}
+          cache: 'pipenv'
+          cache-dependency-path: starter/backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+      - name: Install Python Dependencies
+        run: pipenv install
+
+      - name: Test
+        run: pipenv run test
+
+  backend-build:
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, frontend-test]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: starter/backend
+          file: starter/backend/Dockerfile
+          push: false
