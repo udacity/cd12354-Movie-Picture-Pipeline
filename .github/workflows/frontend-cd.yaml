@@ -78,6 +78,8 @@ jobs:
           build-args:
             - REACT_APP_MOVIE_API_URL: ${{ env.REACT_APP_MOVIE_API_URL }}
           push: true
-          tags: ${{GITHUB_SHA}},latest
+          tags:
+            - ${{ env.GITHUB_SHA }}
+            - latest
 
 
