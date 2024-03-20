@@ -84,6 +84,4 @@ jobs:
           context: starter/backend
           file: starter/backend/Dockerfile
           push: true
-          tags:
-            - mp-backend:${{ github.sha }}
-            - mp-backend:latest
+          tags: mp-backend:${{ github.sha }},mp-backend:latest
