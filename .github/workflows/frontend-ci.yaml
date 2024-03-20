@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: '18.x'
+  NODE_VERSION: '20.x'
 
 jobs:
   frontend-lint:
@@ -20,17 +20,20 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        working-directory: starter/frontend
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+        working-directory: starter/frontend
 
       - name: Lint
         run: |
           npm ci
           npm run lint
+        working-directory: starter/frontend
 
   frontend-test:
     runs-on: ubuntu-latest
@@ -38,17 +41,20 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        working-directory: starter/frontend
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+        working-directory: starter/frontend
 
       - name: Test
         run: |
           npm ci
           npm run test
+        working-directory: starter/frontend
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -57,14 +63,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        working-directory: starter/frontend
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{env.NODE_VERSION}}
           cache: 'npm'
+        working-directory: starter/frontend
 
       - name: Build
         run: |
           npm ci
           npm run test
+        working-directory: starter/frontend
