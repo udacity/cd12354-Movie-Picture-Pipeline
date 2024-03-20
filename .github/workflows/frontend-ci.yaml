@@ -1,4 +1,4 @@
-name: build-test-mp-frontend
+name: Frontend Continuous Integration
 on:
   workflow_dispatch:
 
