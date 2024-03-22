@@ -20,13 +20,13 @@ jobs:
     name: Backend Lint
     uses: ./.github/workflows/backend-lint.yml
     with:
-      python-version: ${{ vars.PYTHON_VERSION }}
+      python-version: '3.10'
 
   call-backend-test:
     name: Backend Test
     uses: ./.github/workflows/backend-test.yml
     with:
-      python-version: ${{ vars.PYTHON_VERSION }}
+      python-version: '3.10'
 
   backend-build:
     name: Backend Build
