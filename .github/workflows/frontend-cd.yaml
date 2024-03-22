@@ -5,6 +5,8 @@ on:
 #  push:
 #    branches:
 #      - main
+#    paths:
+#      - 'starter/frontend/**/*'
 
 env:
   NODE_VERSION: '20.x'
@@ -14,47 +16,21 @@ defaults:
     working-directory: starter/frontend
 
 jobs:
-  frontend-lint:
-    runs-on: ubuntu-latest
+  call-frontend-lint:
+    name: Lint
+    uses: ./.github/workflows/jobs/frontend-lint.yml
+    with:
+      node-version: ${{ vars.NODE_VERSION }}
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{env.NODE_VERSION}}
-          cache: 'npm'
-          cache-dependency-path: starter/frontend
-
-      - name: Lint
-        run: |
-          npm ci
-          npm run lint
-
-  frontend-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{env.NODE_VERSION}}
-          cache: 'npm'
-          cache-dependency-path: starter/frontend
-
-      - name: Test
-        run: |
-          npm ci
-          npm run test
+  call-frontend-test:
+    name: Test
+    uses: ./.github/workflows/jobs/frontend-test.yml
+    with:
+      node-version: ${{ vars.NODE_VERSION }}
 
   frontend-build:
     runs-on: ubuntu-latest
-    needs: [frontend-lint, frontend-test]
+    needs: [call-frontend-lint, call-frontend-test]
 
     steps:
       - name: Check out repository

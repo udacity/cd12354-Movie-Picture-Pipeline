@@ -5,6 +5,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'starter/backend/**/*'
 
 env:
   PYTHON_VERSION: '3.10'
@@ -14,55 +16,21 @@ defaults:
     working-directory: starter/backend
 
 jobs:
-  backend-lint:
-    runs-on: ubuntu-latest
+  call-backend-lint:
+    name: Lint
+    uses: ./.github/workflows/jobs/backend-lint.yml
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{env.PYTHON_VERSION}}
-          cache: 'pipenv'
-          cache-dependency-path: starter/backend/Pipfile.lock
-
-      - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-
-      - name: Install Python Dependencies
-        run: pipenv install
-
-      - name: Lint
-        run: pipenv run test
-
-  backend-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{env.PYTHON_VERSION}}
-          cache: 'pipenv'
-          cache-dependency-path: starter/backend/Pipfile.lock
-
-      - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-
-      - name: Install Python Dependencies
-        run: pipenv install
-
-      - name: Test
-        run: pipenv run test
+  call-backend-test:
+    name: Test
+    uses: ./.github/workflows/jobs/backend-test.yml
+    with:
+      python-version: ${{ vars.PYTHON_VERSION }}
 
   backend-build:
     runs-on: ubuntu-latest
-    needs: [backend-lint, backend-test]
+    needs: [call-backend-lint, call-backend-test]
 
     steps:
       - name: Check out repository

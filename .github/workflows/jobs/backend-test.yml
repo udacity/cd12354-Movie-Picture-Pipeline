@@ -1,0 +1,37 @@
+name: Backend Test Job
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python Version'
+        required: false
+        type: string
+        default: '3.10'
+
+defaults:
+  run:
+    working-directory: starter/backend
+
+jobs:
+  backend-test:
+    name: Test Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pipenv'
+          cache-dependency-path: starter/backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+      - name: Install Python Dependencies
+        run: pipenv install
+
+      - name: Test
+        run: pipenv run test

@@ -1,4 +1,4 @@
-name: Frontend Test Job
+name: Frontend Lint Job
 on:
   workflow_call:
     inputs:
@@ -13,8 +13,8 @@ defaults:
     working-directory: starter/frontend
 
 jobs:
-  frontend-test:
-    name: Frontend Test Job
+  frontend-lint:
+    name: Lint Job
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -23,11 +23,11 @@ jobs:
       - name: Prepare Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node-version }}
+          node-version:
           cache: 'npm'
           cache-dependency-path: starter/frontend
 
-      - name: Test
+      - name: Lint
         run: |
           npm ci
-          npm run test
+          npm run lint
