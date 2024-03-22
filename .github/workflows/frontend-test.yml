@@ -1,4 +1,4 @@
-name: Frontend Test
+name: Frontend Test Job
 on:
   workflow_call:
     inputs:
