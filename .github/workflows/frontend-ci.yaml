@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - 'starter/frontend/**/*'
-vars:
+env:
   NODE_VERSION: '20.x'
 
 defaults:
