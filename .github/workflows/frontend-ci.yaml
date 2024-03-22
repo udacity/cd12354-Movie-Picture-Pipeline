@@ -14,7 +14,7 @@ defaults:
     working-directory: starter/frontend
 
 jobs:
-  get-env-vars:
+  configure-environment:
     name: Get Environment vars
     runs-on: ubuntu-latest
     outputs:
@@ -22,21 +22,24 @@ jobs:
     steps:
       - run: echo "Building with Node version '$NODE_VERSION'."
 
-  call-frontend-lint:
-    needs: [get-env-vars]
+  call-lint:
+    name: Frontend Lint
+    needs: [configure-environment]
     uses: ./.github/workflows/frontend-lint.yml
     with:
-      node-version: ${{needs.get-env-vars.outputs.NODE_VERSION}}
+      node-version: ${{needs.configure-environment.outputs.NODE_VERSION}}
 
-  call-frontend-test:
-    needs: [get-env-vars]
+  call-test:
+    name: Frontend Test
+    needs: [configure-environment]
     uses: ./.github/workflows/frontend-test.yml
     with:
-      node-version: ${{needs.get-env-vars.outputs.NODE_VERSION}}
+      node-version: ${{needs.configure-environment.outputs.NODE_VERSION}}
 
   frontend-build:
+    name: Frontend Build
     runs-on: ubuntu-latest
-    needs: [call-frontend-lint,call-frontend-test]
+    needs: [call-lint,call-test]
 
     steps:
       - name: Check out repository
