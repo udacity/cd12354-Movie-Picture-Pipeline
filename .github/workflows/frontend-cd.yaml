@@ -17,18 +17,19 @@ defaults:
 
 jobs:
   call-frontend-lint:
-    name: Lint
+    name: Frontend Lint
     uses: ./.github/workflows/frontend-lint.yml
     with:
-      node-version: ${{ vars.NODE_VERSION }}
+      node-version: '20.x'
 
   call-frontend-test:
-    name: Test
+    name: Frontend Test
     uses: ./.github/workflows/frontend-test.yml
     with:
-      node-version: ${{ vars.NODE_VERSION }}
+      node-version: '20.x'
 
   frontend-build:
+    name: Frontend Build
     runs-on: ubuntu-latest
     needs: [call-frontend-lint, call-frontend-test]
 
