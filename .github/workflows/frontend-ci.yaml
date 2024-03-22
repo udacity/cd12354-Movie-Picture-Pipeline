@@ -14,47 +14,15 @@ defaults:
     working-directory: starter/frontend
 
 jobs:
-  frontend-lint:
+  frontend-lint-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{env.NODE_VERSION}}
-          cache: 'npm'
-          cache-dependency-path: starter/frontend
-
-      - name: Lint
-        run: |
-          npm ci
-          npm run lint
-
-  frontend-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{env.NODE_VERSION}}
-          cache: 'npm'
-          cache-dependency-path: starter/frontend
-
-      - name: Test
-        run: |
-          npm ci
-          npm run test
+      - uses: SolsticeTechnology/cd12354-Movie-Picture-Pipeline/frontend-lint-test
 
   frontend-build:
     runs-on: ubuntu-latest
-    needs: [frontend-lint, frontend-test]
+    needs: [frontend-lint-test]
 
     steps:
       - name: Check out repository
