@@ -2,11 +2,11 @@ name: Backend Continuous Deployment
 on:
   workflow_dispatch:
 
-#  push:
-#    branches:
-#      - main
-#    paths:
-#      - 'starter/backend/**/*'
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**/*'
 
 env:
   PYTHON_VERSION: '3.10'

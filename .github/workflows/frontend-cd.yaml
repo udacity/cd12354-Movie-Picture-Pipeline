@@ -2,11 +2,11 @@ name: Frontend Continuous Deployment
 on:
   workflow_dispatch:
 
-#  push:
-#    branches:
-#      - main
-#    paths:
-#      - 'starter/frontend/**/*'
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**/*'
 
 env:
   NODE_VERSION: '20.x'
