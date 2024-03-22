@@ -18,13 +18,13 @@ defaults:
 jobs:
   call-frontend-lint:
     name: Frontend Lint
-    uses: ./.github/workflows/frontend-lint.yml
+    uses: ./.github/workflows/frontend-lint-job.yml
     with:
       node-version: '20.x'
 
   call-frontend-test:
     name: Frontend Test
-    uses: ./.github/workflows/frontend-test.yml
+    uses: ./.github/workflows/frontend-test-job.yml
     with:
       node-version: '20.x'
 
