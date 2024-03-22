@@ -24,7 +24,7 @@ jobs:
 
   call-backend-test:
     name: Test
-    uses: ./.github/workflows/jobs/backend-test.yml
+    uses: ./.github/workflows/backend-test.yml
     with:
       python-version: ${{ vars.PYTHON_VERSION }}
 

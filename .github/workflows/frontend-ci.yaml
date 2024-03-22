@@ -23,7 +23,7 @@ jobs:
 
   call-frontend-test:
     name: Test
-    uses: ./.github/workflows/jobs/frontend-test.yml
+    uses: ./.github/workflows/frontend-test.yml
     with:
       node-version: ${{ vars.NODE_VERSION }}
 
