@@ -14,7 +14,7 @@ defaults:
 
 jobs:
   frontend-test:
-    name: Node Test
+    name: Frontend Test Job
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -23,7 +23,7 @@ jobs:
       - name: Prepare Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${node-version}
+          node-version: ${{ inputs.node-version }}
           cache: 'npm'
           cache-dependency-path: starter/frontend
 
