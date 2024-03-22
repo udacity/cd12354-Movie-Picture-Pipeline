@@ -18,7 +18,7 @@ defaults:
 jobs:
   call-backend-lint:
     name: Lint
-    uses: ./.github/workflows/jobs/backend-lint.yml
+    uses: ./.github/workflows/backend-lint.yml
     with:
       python-version: ${{ vars.PYTHON_VERSION }}
 

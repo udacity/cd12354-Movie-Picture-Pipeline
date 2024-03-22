@@ -18,7 +18,7 @@ defaults:
 jobs:
   call-frontend-lint:
     name: Lint
-    uses: ./.github/workflows/jobs/frontend-lint.yml
+    uses: ./.github/workflows/frontend-lint.yml
     with:
       node-version: ${{ vars.NODE_VERSION }}
 
