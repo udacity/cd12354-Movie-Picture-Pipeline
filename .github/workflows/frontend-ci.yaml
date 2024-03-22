@@ -14,27 +14,19 @@ defaults:
     working-directory: starter/frontend
 
 jobs:
-  configure-environment:
-    name: Configure Environment
-    runs-on: ubuntu-latest
-    outputs:
-      NODE_VERSION: ${{ env.NODE_VERSION }}
-    steps:
-      - run: echo ""
-
   call-lint:
     name: Frontend Lint
     needs: [configure-environment]
     uses: ./.github/workflows/frontend-lint.yml
     with:
-      node-version: ${{needs.configure-environment.outputs.NODE_VERSION}}
+      node-version: '20.x'
 
   call-test:
     name: Frontend Test
     needs: [configure-environment]
     uses: ./.github/workflows/frontend-test.yml
     with:
-      node-version: ${{needs.configure-environment.outputs.NODE_VERSION}}
+      node-version: '20.x'
 
   frontend-build:
     name: Frontend Build
