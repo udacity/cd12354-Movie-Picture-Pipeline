@@ -16,14 +16,12 @@ defaults:
 jobs:
   call-lint:
     name: Frontend Lint
-    needs: [configure-environment]
     uses: ./.github/workflows/frontend-lint.yml
     with:
       node-version: '20.x'
 
   call-test:
     name: Frontend Test
-    needs: [configure-environment]
     uses: ./.github/workflows/frontend-test.yml
     with:
       node-version: '20.x'
