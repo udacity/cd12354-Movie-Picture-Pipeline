@@ -18,7 +18,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: jobs/frontend-lint-test.yml
+      - uses: ./.github/workflows/jobs/frontend-lint-test.yml
+        with:
+          node-version: ${{env.NODE_VERSION}}
 
   frontend-build:
     runs-on: ubuntu-latest
