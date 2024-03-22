@@ -20,7 +20,7 @@ jobs:
     outputs:
       NODE_VERSION: ${{ env.NODE_VERSION }}
     steps:
-      - run: :
+      - run: echo ""
 
   call-lint:
     name: Frontend Lint
