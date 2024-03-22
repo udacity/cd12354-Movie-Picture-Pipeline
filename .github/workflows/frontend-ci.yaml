@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: SolsticeTechnology/cd12354-Movie-Picture-Pipeline/frontend-lint-test
+      - uses: jobs/frontend-lint-test.yml
 
   frontend-build:
     runs-on: ubuntu-latest
