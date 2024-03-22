@@ -16,13 +16,13 @@ defaults:
 jobs:
   call-frontend-lint:
     uses: ./.github/workflows/frontend-lint.yml
-      with:
-        node-version: ${{env.NODE_VERSION}}
+    with:
+      node-version: ${{env.NODE_VERSION}}
 
   call-frontend-test:
     uses: ./.github/workflows/frontend-test.yml
-      with:
-        node-version: ${{env.NODE_VERSION}}
+    with:
+      node-version: ${{env.NODE_VERSION}}
 
   frontend-build:
     runs-on: ubuntu-latest
