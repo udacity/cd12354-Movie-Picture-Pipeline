@@ -20,7 +20,7 @@ jobs:
     outputs:
       NODE_VERSION: ${{ env.NODE_VERSION }}
     steps:
-      - run: echo "Building with Node version '$NODE_VERSION'."
+      - run: echo "Building with Node version ${{env.NODE_VERSION}}"
 
   call-lint:
     name: Frontend Lint

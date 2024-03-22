@@ -14,6 +14,7 @@ defaults:
 
 jobs:
   frontend-test:
+    name: Node Test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

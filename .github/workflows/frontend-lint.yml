@@ -14,6 +14,7 @@ defaults:
 
 jobs:
   frontend-lint:
+    name: Node Lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
