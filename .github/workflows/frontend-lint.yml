@@ -1,0 +1,32 @@
+name: Frontend Lint
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node Version'
+        required: false
+        type: string
+        default: '20.x'
+
+defaults:
+  run:
+    working-directory: starter/frontend
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${node-version}
+          cache: 'npm'
+          cache-dependency-path: starter/frontend
+
+      - name: Lint
+        run: |
+          npm ci
+          npm run lint
