@@ -7,8 +7,11 @@ on:
   workflow_dispatch:
 
   # Automatic trigger on push events to the main branch
-  merge:
-    branches:
+on:
+  pull_request:
+    types:
+      - closed
+    branches: 
       - main
 
 env:
@@ -20,9 +23,10 @@ env:
 
 # Jobs defined in the workflow
 jobs:
-    applytf:
-        runs-on: ubuntu-latest
-        name: "Apply TF"
+  applytf:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+      - name: "Apply TF"
         permissions:
             pull-requests: write
             contents: read
