@@ -41,7 +41,7 @@ jobs:
       # Run the linter.
      # - run: cd ../../starter/frontend && npm run lint
       - name: Run the linter
-        run: npm run lint
+        run:  cd starter/frontend && npm run lint
        
       # Run the tests.
       - name: Run tests
