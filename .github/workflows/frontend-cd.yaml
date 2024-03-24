@@ -84,7 +84,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v2
+        uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
 
