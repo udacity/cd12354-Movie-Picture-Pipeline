@@ -70,5 +70,3 @@ jobs:
           file: starter/backend/Dockerfile
           build-args: REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }}
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
