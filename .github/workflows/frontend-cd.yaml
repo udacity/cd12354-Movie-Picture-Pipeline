@@ -46,7 +46,7 @@ jobs:
       - name: Login to Amazon ECR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.AWS_ECR_REGISTRY }}/frontend
+          registry: ${{ secrets.AWS_ECR_REGISTRY }}/frontend
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -60,7 +60,7 @@ jobs:
           file: starter/frontend/Dockerfile
           build-args: REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }}
           push: true
-          tags: ${{ env.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ env.AWS_ECR_REGISTRY }}/frontend:latest
+          tags: ${{ secrets.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ secrets.AWS_ECR_REGISTRY }}/frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -98,5 +98,5 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kustomize edit set image frontend=${{ env.AWS_ECR_REGISTRY }}/frontend:latest
+          kustomize edit set image frontend=${{ secrets.AWS_ECR_REGISTRY }}/frontend:latest
           kustomize build | kubectl apply -f -
