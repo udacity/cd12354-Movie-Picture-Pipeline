@@ -16,7 +16,8 @@ on:
     branches:
       - main
 
-
+env:
+ AWS_REGION: us-east-1
 # Jobs defined in the workflow
 jobs:
   lint-and-test-job:
@@ -30,8 +31,8 @@ jobs:
         with:
           node-version: latest
 
-      - name: Debug message- env.AWS_REGION
-        run: cd starter/frontend && echo ${{ env.AWS_REGION }}
+      - name: Debug message
+        run: echo ${{ env.AWS_REGION }}
 
       - name: Cache NPM dependencies
         uses: actions/cache@v2
@@ -98,7 +99,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_ACCESS_TOKEN}}
-          aws-region: ${{env.AWS_REGION}}
+          aws-region: $AWS_REGION
           mask-aws-account-id: 'false'
 
       #Docker setup for deployment
