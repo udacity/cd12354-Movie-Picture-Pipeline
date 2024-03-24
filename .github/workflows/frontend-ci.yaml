@@ -30,6 +30,10 @@ jobs:
         with:
           node-version: latest
 
+      - name: Debug message
+    
+        run: echo pwd
+
        # Install the dependencies.
       - run: cd ../../starter/frontend && npm ci
 
