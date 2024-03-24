@@ -37,6 +37,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Workaround for lack of support for the 'env' context in the 'with' clause
+      - name: Resolve Environment Variables
+        id: get-env
+        outputs:
+          AWS_ECR_REGISTRY: ${{ env.AWS_ECR_REGISTRY }}
+        run: |
+          echo "AWS_ECR_REGISTRY = $AWS_ECR_REGISTRY"
+
       - name: Generate Short SHA
         id: short-sha
         uses: benjlevesque/short-sha@v3.0
@@ -46,7 +54,7 @@ jobs:
       - name: Login to Amazon ECR
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.AWS_ECR_REGISTRY }}/backend
+          registry: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -59,7 +67,7 @@ jobs:
           context: starter/backend
           file: starter/backend/Dockerfile
           push: true
-          tags: ${{ secrets.AWS_ECR_REGISTRY }}/backend:${{ steps.short-sha.outputs.sha }},${{ secrets.AWS_ECR_REGISTRY }}/backend:latest
+          tags: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend:${{ steps.short-sha.outputs.sha }},${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend:latest
 
   backend-deploy:
     name: Backend Deploy
@@ -73,12 +81,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Resolve Environment Variables
+        id: get-env
+        outputs:
+          AWS_ECR_REGISTRY: ${{ env.AWS_ECR_REGISTRY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          echo "AWS_ECR_REGISTRY = $AWS_ECR_REGISTRY"
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ steps.get-env.outputs.AWS_REGION }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -87,7 +103,7 @@ jobs:
 
       - name: Configure Kubectl Credentials
         run: |
-          aws eks update-kubeconfig --region us-east-1 --name cluster
+          aws eks update-kubeconfig --region $AWS_REGION --name cluster
 
       - name: Install Kustomize
         run: |
@@ -95,7 +111,7 @@ jobs:
 
       - name: Generate Kubernetes Manifest
         run: |
-          kustomize edit set image backend=${{ secrets.AWS_ECR_REGISTRY }}/backend:latest
+          kustomize edit set image backend=$AWS_ECR_REGISTRY/backend:latest
           kustomize build > backend.yml
 
       - name: Deploy to Kubernetes

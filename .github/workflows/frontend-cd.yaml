@@ -37,6 +37,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Workaround for lack of support for the 'env' context in the 'with' clause
+      - name: Resolve Environment Variables
+        id: get-env
+        outputs:
+          AWS_ECR_REGISTRY: ${{ env.AWS_ECR_REGISTRY }}
+          REACT_APP_MOVIE_API_URL: ${{ env.REACT_APP_MOVIE_API_URL }}
+        run: |
+          echo "AWS_ECR_REGISTRY = $AWS_ECR_REGISTRY"
+          echo "REACT_APP_MOVIE_API_URL = $REACT_APP_MOVIE_API_URL"
+
       - name: Generate Short SHA
         id: short-sha
         uses: benjlevesque/short-sha@v3.0
@@ -46,7 +56,7 @@ jobs:
       - name: Login to Amazon ECR
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.AWS_ECR_REGISTRY }}/frontend
+          registry: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/frontend
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -58,11 +68,9 @@ jobs:
         with:
           context: starter/frontend
           file: starter/frontend/Dockerfile
-          build-args: REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }}
+          build-args: REACT_APP_MOVIE_API_URL=${{ steps.get-env.outputs.REACT_APP_MOVIE_API_URL }}
           push: true
-          tags: ${{ secrets.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ secrets.AWS_ECR_REGISTRY }}/frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ steps.get-env.outputs.AWS_ECR_REGISTRY  }}/frontend:latest
 
   frontend-deploy:
     name: Frontend Deploy
@@ -98,7 +106,7 @@ jobs:
 
       - name: Generate Kubernetes Manifest
         run: |
-          kustomize edit set image frontend=${{ secrets.AWS_ECR_REGISTRY }}/frontend:latest
+          kustomize edit set image frontend=$AWS_ECR_REGISTRY/frontend:latest
           kustomize build > frontend.yml
 
       - name: Deploy to Kubernetes
