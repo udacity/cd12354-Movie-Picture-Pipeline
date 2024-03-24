@@ -100,4 +100,3 @@ jobs:
         run: |
           kustomize edit set image frontend=${{ env.AWS_ECR_REGISTRY }}/frontend:latest
           kustomize build | kubectl apply -f -
-        with:
