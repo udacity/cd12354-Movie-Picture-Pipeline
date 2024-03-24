@@ -9,7 +9,8 @@ on:
       - 'starter/frontend/**/*'
 
 env:
-  NODE_VERSION: '20.x'
+  AWS_ECR_REGISTRY: ${{ vars.AWS_ECR_REGISTRY }}
+  AWS_REGION: ${{ AWS_REGION }}
 
 defaults:
   run:
@@ -37,13 +38,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # Workaround for lack of support for the 'env' context in the 'with' clause
-      - name: Resolve Environment Variables
-        id: get-env
-        run: |
-          echo "AWS_ECR_REGISTRY=$AWS_ECR_REGISTRY" >> "$GITHUB_OUTPUT"
-          echo "REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL" >> "$GITHUB_OUTPUT"
-
       - name: Generate Short SHA
         id: short-sha
         uses: benjlevesque/short-sha@v3.0
@@ -53,7 +47,7 @@ jobs:
       - name: Login to Amazon ECR
         uses: docker/login-action@v3
         with:
-          registry: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/frontend
+          registry: ${{ vars.AWS_ECR_REGISTRY }}/frontend
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -65,9 +59,9 @@ jobs:
         with:
           context: starter/frontend
           file: starter/frontend/Dockerfile
-          build-args: REACT_APP_MOVIE_API_URL=${{ steps.get-env.outputs.REACT_APP_MOVIE_API_URL }}
+          build-args: REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }}
           push: true
-          tags: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ steps.get-env.outputs.AWS_ECR_REGISTRY  }}/frontend:latest
+          tags: ${{ vars.AWS_ECR_REGISTRY }}/frontend:${{ steps.short-sha.outputs.sha }},${{ vars.AWS_ECR_REGISTRY }}/frontend:latest
 
   frontend-deploy:
     name: Frontend Deploy
@@ -81,17 +75,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Resolve Environment Variables
-        id: get-env
-        run: |
-          echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_OUTPUT"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ steps.get-env.outputs.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -100,7 +89,7 @@ jobs:
 
       - name: Configure Kubectl Credentials
         run: |
-          aws eks update-kubeconfig --region $AWS_REGION --name cluster
+          aws eks update-kubeconfig --region ${AWS_REGION} --name cluster
 
       - name: Install Kustomize
         run: |
@@ -108,7 +97,7 @@ jobs:
 
       - name: Generate Kubernetes Manifest
         run: |
-          kustomize edit set image frontend=$AWS_ECR_REGISTRY/frontend:latest
+          kustomize edit set image frontend=${AWS_ECR_REGISTRY}/frontend:latest
           kustomize build > frontend.yml
 
       - name: Deploy to Kubernetes

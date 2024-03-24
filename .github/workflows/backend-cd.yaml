@@ -9,7 +9,8 @@ on:
       - 'starter/backend/**/*'
 
 env:
-  PYTHON_VERSION: '3.10'
+  AWS_ECR_REGISTRY: ${{ vars.AWS_ECR_REGISTRY }}
+  AWS_REGION: ${{ AWS_REGION }}
 
 defaults:
   run:
@@ -37,12 +38,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # Workaround for lack of support for the 'env' context in the 'with' clause
-      - name: Resolve Environment Variables
-        id: get-env
-        run: |
-          echo "AWS_ECR_REGISTRY=$AWS_ECR_REGISTRY" >> "$GITHUB_OUTPUT"
-
       - name: Generate Short SHA
         id: short-sha
         uses: benjlevesque/short-sha@v3.0
@@ -52,7 +47,7 @@ jobs:
       - name: Login to Amazon ECR
         uses: docker/login-action@v3
         with:
-          registry: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend
+          registry: ${{ vars.AWS_ECR_REGISTRY }}/backend
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -65,7 +60,7 @@ jobs:
           context: starter/backend
           file: starter/backend/Dockerfile
           push: true
-          tags: ${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend:${{ steps.short-sha.outputs.sha }},${{ steps.get-env.outputs.AWS_ECR_REGISTRY }}/backend:latest
+          tags: ${{ vars.AWS_ECR_REGISTRY }}/backend:${{ steps.short-sha.outputs.sha }},${{ vars.AWS_ECR_REGISTRY }}/backend:latest
 
   backend-deploy:
     name: Backend Deploy
@@ -79,17 +74,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Resolve Environment Variables
-        id: get-env
-        run: |
-          echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_OUTPUT"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ steps.get-env.outputs.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
