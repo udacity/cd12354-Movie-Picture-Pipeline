@@ -10,7 +10,7 @@ on:
 
 env:
   AWS_ECR_REGISTRY: ${{ vars.AWS_ECR_REGISTRY }}
-  AWS_REGION: ${{ AWS_REGION }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
 
 defaults:
   run:
