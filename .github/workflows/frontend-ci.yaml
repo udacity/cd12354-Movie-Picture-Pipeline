@@ -35,16 +35,17 @@ jobs:
         run: echo pwd
 
        # Install the dependencies.
-      - run: cd ../../starter/frontend && npm ci
-
-      # Run the tests.
-      - run: cd ../../starter/frontend && npm test
+     # - run: cd ../../starter/frontend && npm ci
+       - run: npm ci
 
       # Run the linter.
-      - run: cd ../../starter/frontend && npm run lint
-
+     # - run: cd ../../starter/frontend && npm run lint
+      - name: Run the linter
+       - run: npm run lint
+       
+      # Run the tests.
       - name: Run tests
-        run: npm test
+         run: npm test
 
       - name: Debug message
         if: env.DEBUG == 'true'
