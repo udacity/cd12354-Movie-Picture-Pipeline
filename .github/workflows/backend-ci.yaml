@@ -1,5 +1,5 @@
 # Workflow name
-name: Frontend Continuous Integration
+name: Backend Continuous Integration
 
 # Triggers for the workflow
 on:
@@ -41,22 +41,17 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-npm-cache-
 
-       # Install the dependencies.
-      - name: Install the dependencies
-        run:  cd starter/frontend && npm ci
+      # Install the dependencies.
+      # - name: Install the dependencies
+      #  run:  cd starter/backend && npm ci
 
       # Run the linter.
-     # - run: cd ../../starter/frontend && npm run lint
       - name: Run the linter
-        run:  cd starter/frontend && npm run lint
+        run:  cd starter/backend && npm run lint
        
       # Run the tests.
       - name: Run tests
-        run: cd starter/frontend && npm test
-
-      - name: Debug message
-        if: env.DEBUG == 'true'
-        run: echo "Debugging is enabled."
+        run: cd starter/backend && npm test
 
   build-job:
     runs-on: ubuntu-latest
@@ -73,7 +68,7 @@ jobs:
 
       - name: Build docker frontend image #Tag the built docker image with the git sha (use GitHub Context)
         #if: github.ref == 'refs/heads/main'
-        run: cd starter/frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
+        run: cd starter/backend && docker build --tag=mp-backend:latest .
 
      # - name: Run docker image
       #  run: docker run --name mp-frontend -p 3000:3000 -d mp-frontend
