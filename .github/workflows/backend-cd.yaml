@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 # Automatic trigger on pull request event against main branch is closed
-on:
+
   pull_request:
     types:
       - closed

@@ -17,7 +17,7 @@ on:
       - main
 
 env:
- AWS_REGION: us-east-1
+  AWS_REGION: us-east-1
 # Jobs defined in the workflow
 jobs:
   lint-and-test-job:
