@@ -40,10 +40,8 @@ jobs:
       # Workaround for lack of support for the 'env' context in the 'with' clause
       - name: Resolve Environment Variables
         id: get-env
-        outputs:
-          AWS_ECR_REGISTRY: ${{ env.AWS_ECR_REGISTRY }}
         run: |
-          echo "AWS_ECR_REGISTRY = $AWS_ECR_REGISTRY"
+          echo "AWS_ECR_REGISTRY=$AWS_ECR_REGISTRY" >> "$GITHUB_OUTPUT"
 
       - name: Generate Short SHA
         id: short-sha
@@ -83,11 +81,8 @@ jobs:
 
       - name: Resolve Environment Variables
         id: get-env
-        outputs:
-          AWS_ECR_REGISTRY: ${{ env.AWS_ECR_REGISTRY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
-          echo "AWS_ECR_REGISTRY = $AWS_ECR_REGISTRY"
+          echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
