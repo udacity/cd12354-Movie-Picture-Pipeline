@@ -87,7 +87,7 @@ jobs:
 
       - name: Configure Kubectl Credentials
         run: |
-          aws eks update-kubeconfig
+          aws eks update-kubeconfig --region us-east-1 --name cluster
 
       - name: Install Kustomize
         run: |
