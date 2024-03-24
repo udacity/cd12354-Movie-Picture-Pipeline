@@ -89,15 +89,18 @@ jobs:
           version: 'latest'
 
       - name: Configure Kubectl Credentials
-        working-directory: ./setup
         run: |
-          ./init.sh
+          aws eks update-kubeconfig --region us-east-1 --name cluster
 
       - name: Install Kustomize
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 
-      - name: Deploy to Kubernetes
+      - name: Generate Kubernetes Manifest
         run: |
           kustomize edit set image frontend=${{ secrets.AWS_ECR_REGISTRY }}/frontend:latest
-          kustomize build | kubectl apply -f -
+          kustomize build > frontend.yml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f frontend.yml

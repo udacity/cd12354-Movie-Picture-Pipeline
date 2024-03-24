@@ -94,7 +94,11 @@ jobs:
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
 
-      - name: Deploy to Kubernetes
+      - name: Generate Kubernetes Manifest
         run: |
           kustomize edit set image backend=${{ secrets.AWS_ECR_REGISTRY }}/backend:latest
-          kustomize build | kubectl apply -f -
+          kustomize build > backend.yml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f backend.yml
