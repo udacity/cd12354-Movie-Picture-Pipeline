@@ -31,12 +31,12 @@ jobs:
           node-version: latest
 
       - name: Debug message
-        run: echo pwd
+        run: cd starter/frontend && echo pwd
 
        # Install the dependencies.
      # - run: cd ../../starter/frontend && npm ci
-      #- name: Run ci
-      #  run: npm ci
+      - name: Run ci
+        run:  cd starter/frontend && npm ci
 
       # Run the linter.
      # - run: cd ../../starter/frontend && npm run lint
