@@ -1,0 +1,78 @@
+# Workflow name
+name: Backend Continuous Deployment
+
+# Triggers for the workflow
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  merge:
+    branches:
+      - main
+
+env:
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+   
+
+# Jobs defined in the workflow
+jobs:
+    applytf:
+        runs-on: ubuntu-latest
+        name: "Apply TF"
+        permissions:
+            pull-requests: write
+            contents: read
+        defaults:
+            run:
+                working-directory: ./iac
+        steps:
+          - uses: actions/checkout@v3
+          - name: Setup Terraform
+            uses: hashicorp/setup-terraform@v2
+          - name: Terraform Init
+            id: init
+            run: terraform init
+          - name: Terraform apply
+            run: terraform apply -auto-approve -input=false
+    publishdocker:
+        name: "Build docker and publish to ECR"
+        needs: [ applytf ]
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./src
+        steps:
+          - name: Check out code
+            uses: actions/checkout@v3
+
+          - name: Bump version and push tag
+            id: tag_version
+            uses: mathieudutour/github-tag-action@v6.1
+            with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              release_branches: "main,develop"
+        
+          - name: Configure AWS credentials
+            uses: aws-actions/configure-aws-credentials@v4
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+          - name: Login to Amazon ECR
+            id: login-ecr
+            uses: aws-actions/amazon-ecr-login@v2
+
+          - name: Build, tag, and push image to Amazon ECR
+            env:
+              ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              ECR_REPOSITORY: example
+              IMAGE_TAG: ${{ steps.tag_version.outputs.new_version  }}
+            run: |
+              docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f .
+              docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
