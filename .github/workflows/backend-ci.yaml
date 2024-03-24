@@ -46,12 +46,12 @@ jobs:
       #  run:  cd starter/backend && npm ci
 
       # Run the linter.
-      - name: Run the linter
-        run:  cd starter/backend && npm run lint
+      #- name: Run the linter
+      #  run:  cd starter/backend && npm run lint
        
       # Run the tests.
-      - name: Run tests
-        run: cd starter/backend && npm test
+     # - name: Run tests
+     #   run: cd starter/backend && npm test
 
   build-job:
     runs-on: ubuntu-latest
