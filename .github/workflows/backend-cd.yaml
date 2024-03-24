@@ -86,9 +86,8 @@ jobs:
           version: 'latest'
 
       - name: Configure Kubectl Credentials
-        working-directory: ./setup
         run: |
-          ./init.sh
+          aws eks update-kubeconfig --region us-east-1 --name cluster
 
       - name: Install Kustomize
         run: |
