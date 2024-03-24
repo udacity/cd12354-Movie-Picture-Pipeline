@@ -33,9 +33,16 @@ jobs:
       - name: Debug message
         run: cd starter/frontend && echo pwd
 
+      - name: Cache NPM dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-cache-
+
        # Install the dependencies.
-     # - run: cd ../../starter/frontend && npm ci
-      - name: Run ci
+      - name: Install the dependencies
         run:  cd starter/frontend && npm ci
 
       # Run the linter.
@@ -45,7 +52,7 @@ jobs:
        
       # Run the tests.
       - name: Run tests
-        run: npm test
+        run: cd starter/frontend && npm test
 
       - name: Debug message
         if: env.DEBUG == 'true'
@@ -64,11 +71,12 @@ jobs:
         with:
           node-version: latest
 
-      - name: Print a message for main branch
-        if: github.ref == 'refs/heads/main'
-        run: cd ../../starter/frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
+      - name: Build docker frontend image #Tag the built docker image with the git sha (use GitHub Context)
+        #if: github.ref == 'refs/heads/main'
+        run: cd starter/frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
 
      # - name: Run docker image
       #  run: docker run --name mp-frontend -p 3000:3000 -d mp-frontend
 
- 
+      #TODO: Push the image to ECR
+      #TODO: Apply the Kubernetes manfiests using the image tag from build
