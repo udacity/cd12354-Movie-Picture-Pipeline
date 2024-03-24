@@ -35,8 +35,8 @@ jobs:
 
        # Install the dependencies.
      # - run: cd ../../starter/frontend && npm ci
-      - name: Run ci
-        run: npm ci
+      #- name: Run ci
+      #  run: npm ci
 
       # Run the linter.
      # - run: cd ../../starter/frontend && npm run lint
