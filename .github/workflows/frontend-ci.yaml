@@ -1,0 +1,69 @@
+# Workflow name
+name: cd12345-moview-job
+
+# Triggers for the workflow
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  push:
+    branches:
+      - main
+
+  # Automatic trigger on pull request events targeting the main branch
+  pull_request:
+    branches:
+      - main
+
+
+# Jobs defined in the workflow
+jobs:
+  lint-and-test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+       # Install the dependencies.
+      - run: cd ../../starter/frontend && npm ci
+
+      # Run the tests.
+      - run: cd ../../starter/frontend && npm test
+
+      # Run the linter.
+      - run: cd ../../starter/frontend && npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Debug message
+        if: env.DEBUG == 'true'
+        run: echo "Debugging is enabled."
+
+  build-job:
+    runs-on: ubuntu-latest
+    needs: lint-and-test-job #dependent job
+   
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Print a message for main branch
+        if: github.ref == 'refs/heads/main'
+        run: cd ../../starter/frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
+
+     # - name: Run docker image
+      #  run: docker run --name mp-frontend -p 3000:3000 -d mp-frontend
+
+ 
