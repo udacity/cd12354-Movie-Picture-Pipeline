@@ -59,10 +59,10 @@ jobs:
         if: env.DEBUG == 'true'
         run: echo "Debugging is enabled."
 
-  build-job:
-    runs-on: ubuntu-latest
-    needs: lint-and-test-job #dependent job
-    steps:
+    build-job:
+      runs-on: ubuntu-latest
+      needs: lint-and-test-job #dependent job
+      steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
