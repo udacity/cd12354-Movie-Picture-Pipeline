@@ -8,3 +8,4 @@ credentials
 .DS_Store
 **/.DS_Store
 **/*.log
+aws-iam-authenticator
