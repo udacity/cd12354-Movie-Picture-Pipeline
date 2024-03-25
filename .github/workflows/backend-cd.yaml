@@ -34,15 +34,15 @@ jobs:
         defaults:
             run:
                 working-directory: ./iac
-        steps:
-          - uses: actions/checkout@v3
-          - name: Setup Terraform
-            uses: hashicorp/setup-terraform@v2
-          - name: Terraform Init
-            id: init
-            run: terraform init
-          - name: Terraform apply
-            run: terraform apply -auto-approve -input=false
+      - name: Set Terraform
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      - name: Terraform apply
+        run: terraform apply -auto-approve -input=false
     publishdocker:
         name: "Build docker and publish to ECR"
         needs: [ applytf ]
