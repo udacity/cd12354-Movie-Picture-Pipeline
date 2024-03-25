@@ -9,3 +9,4 @@ credentials
 **/.DS_Store
 **/*.log
 aws-iam-authenticator
+/gh-cli/
