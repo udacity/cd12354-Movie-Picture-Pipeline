@@ -10,6 +10,10 @@ COPY package*.json ./
 
 RUN pwd
 
+RUN cat package*.json
+
+RUN cat ./package*.json
+
 # Install packages
 RUN npm ci
 
