@@ -5,6 +5,8 @@ ENV REACT_APP_MOVIE_API_URL=${REACT_APP_MOVIE_API_URL}
 
 WORKDIR /app
 
+RUN mkdir -p public
+RUN mkdir -p src
 # Copy dependdency files
 COPY package*.json .
 COPY public/ /app/public/
