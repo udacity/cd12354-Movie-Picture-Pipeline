@@ -7,8 +7,8 @@ WORKDIR /app
 
 # Copy dependdency files
 COPY package*.json .
-COPY public ./public
-ADD src ./src
+COPY public /app/public
+ADD src /app/src
 
 RUN pwd
 
