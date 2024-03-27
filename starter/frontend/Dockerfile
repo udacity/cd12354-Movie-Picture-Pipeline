@@ -10,8 +10,9 @@ RUN mkdir -p src
 # Copy dependdency files
 COPY package*.json .
 #COPY public/ /app/public/
+#COPY src/ /app/src/
 COPY public /app/public/
-COPY src/ /app/src/
+COPY src /app/src/
 
 RUN ls -lrt /app/
 # Install packages
