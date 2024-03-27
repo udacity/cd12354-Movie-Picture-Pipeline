@@ -13,8 +13,9 @@ COPY public/ /app/
 COPY src/ /app/
 #COPY public /app/public/
 #COPY src /app/src/
-
-RUN ls -lrt /app/
+COPY src/ /app/src/
+COPY public/ /app/public/
+RUN ls -lrt /app/public
 # Install packages
 RUN npm ci
 
