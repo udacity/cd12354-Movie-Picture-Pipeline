@@ -10,7 +10,7 @@ COPY package*.json ./
 
 RUN pwd
 
-RUN cat package*.json
+#RUN cat package*.json
 
 RUN cat ./package*.json
 
