@@ -7,8 +7,8 @@ WORKDIR /app
 
 # Copy dependdency files
 COPY package*.json .
-COPY public/ /app/
-COPY src/ /app/
+COPY public/ /app/public/
+COPY src/ /app/src/
 
 RUN ls -lrt /app/
 # Install packages
