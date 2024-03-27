@@ -13,7 +13,7 @@ RUN pwd
 
 #RUN cat package*.json
 
-RUN cat /app/package*.json
+RUN ls -lrt
 
 # Install packages
 RUN npm ci
