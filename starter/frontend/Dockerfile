@@ -8,6 +8,8 @@ WORKDIR /app
 # Copy dependdency files
 COPY package*.json ./
 
+RUN pwd
+
 # Install packages
 RUN npm ci
 
