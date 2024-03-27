@@ -1,6 +1,6 @@
 # Workflow name
 name: Backend Continuous Deployment
-
+needs: [build-and-test-1, backend-build-job]
 # Triggers for the workflow
 on:
   # Manual trigger using the workflow_dispatch event

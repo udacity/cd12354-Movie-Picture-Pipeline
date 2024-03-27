@@ -6,10 +6,6 @@ on:
   # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
 
-  # Automatic trigger on push events to the main branch
-  push:
-    branches:
-      - main
 
   # Automatic trigger on pull request events targeting the main branch
   pull_request:
@@ -19,7 +15,7 @@ on:
 
 # Jobs defined in the workflow
 jobs:
-  lint-and-test-job:
+  backend-lint-and-test-job:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -53,9 +49,9 @@ jobs:
      # - name: Run tests
      #   run: cd starter/backend && npm test
 
-  build-job:
+  backend-build-job:
     runs-on: ubuntu-latest
-    needs: lint-and-test-job #dependent job
+    needs: backend-lint-and-test-job #dependent job
   
     steps:
       - name: Checkout code

@@ -1,0 +1,49 @@
+name: 'Terraform Kubernetes Deployment'
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+
+env:
+  AWS_REGION:  ${{ env.AWS_REGION }}    # Update this to your AWS Region
+  TF_ACTION_WORKING_DIR: 'setup/terraform' # Update this to your Terraform files directory
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }} # Use your stored AWS Access Key ID
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }} # Use your stored AWS Secret Access Key
+          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+          aws-region: ${{ env.AWS_REGION }} # Use the region from your environment variables
+        
+      # Set up the specified version of Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      
+      # Initialize your Terraform configuration
+      - name: Terraform Init
+        run: terraform init
+
+      # Validate your Terraform configuration
+      - name: Terraform Validate
+        run: terraform validate 
+
+      # Generate and display an execution plan
+      - name: Terraform Plan
+        run: terraform plan 
+
+      # Apply the changes required to reach the desired state of the configuration
+      - name: Terraform Apply
+        run: terraform apply -auto-approve 
+      
