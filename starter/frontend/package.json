@@ -17,6 +17,7 @@
     "serve": "serve -s build",
     "lint": "eslint .",
     "start": "react-scripts start",
+   
     "build": "react-scripts build",
     "test": "react-scripts test --transformIgnorePatterns",
     "clean": "rm -rf ./node_modules && rm -rf ./build"

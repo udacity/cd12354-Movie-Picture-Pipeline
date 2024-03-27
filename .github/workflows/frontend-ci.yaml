@@ -1,0 +1,151 @@
+# Workflow name
+name: Frontend Continuous Integration
+
+# Triggers for the workflow
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  push:
+    branches:
+      - main
+
+  # Automatic trigger on pull request events targeting the main branch
+  pull_request:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+# Jobs defined in the workflow
+jobs:
+  frontend-lint-and-test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          
+
+      - name: Debug message ECR
+        run: echo ${{ env.ECR_REPOSITORY}}
+
+      - name: Print message - ECR
+        run: echo ${{ env.ECR_REPOSITORY}}
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-cache-
+
+       # Install the dependencies.
+      - name: Install the dependencies
+        run:  cd starter/frontend && npm ci
+
+      # Run the linter.
+     # - run: cd ../../starter/frontend && npm run lint
+      - name: Run the linter
+        run:  cd starter/frontend && npm run lint
+       
+      # Run the tests.
+      - name: Run tests
+        run: cd starter/frontend && npm test
+
+      - name: Debug message
+        if: env.DEBUG == 'true'
+        run: echo "Debugging is enabled."
+
+
+    
+  frontend-build-job:
+    runs-on: ubuntu-latest
+    needs: frontend-lint-and-test-job #dependent job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+
+      #Setup docker 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build docker frontend image #Tag the built docker image with the git sha (use GitHub Context)
+        #if: github.ref == 'refs/heads/main'
+        run: cd starter/frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag=mp-frontend:latest .
+
+      # - name: Run docker image
+      #  run: docker run --name mp-frontend -p 3000:3000 -d mp-frontend
+      #Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          #role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_ACCESS_TOKEN}}
+          aws-region: us-east-1
+          mask-aws-account-id: 'false'
+
+      #Docker setup for deployment
+    
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        #with:
+        #mask-password: 'false'
+      #below added
+
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{steps.vars.outputs.sha_short }}
+          PR_NUMBER: ${{ github.event.number }}
+        with:
+          context: .
+          file: starter/frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/cd12354-movie-picture-pipeline:${{ steps.vars.outputs.sha_short }}
+           # ${{ github.sha }}
+            #${{ steps.vars.outputs.sha_short }}
+          # outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+
+        
+  
+
+    outputs:
+      registry: ${{ steps.login-ecr.outputs.registry }}
+      #docker_username: ${{ steps.login-ecr.outputs.docker_username_123456789012_dkr_ecr_us_east_1_amazonaws_com }} # More information on these outputs can be found below in the 'Docker Credentials' section
+      #docker_password: ${{ steps.login-ecr.outputs.docker_password_123456789012_dkr_ecr_us_east_1_amazonaws_com }}
+      #TODO: Apply the Kubernetes manfiests using the image tag from build

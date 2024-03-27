@@ -5,14 +5,22 @@ ENV REACT_APP_MOVIE_API_URL=${REACT_APP_MOVIE_API_URL}
 
 WORKDIR /app
 
+RUN mkdir -p public
+RUN mkdir -p src
 # Copy dependdency files
-COPY package*.json ./
+COPY package*.json .
 
+#Option 1
+#COPY public/ /app/
+#COPY src/ /app/
+#Option 2
+COPY src/ /app/src/
+COPY public/ /app/public/
+RUN ls -lrt /app/public
 # Install packages
 RUN npm ci
 
-# Copy code
-COPY . .
+
 
 # Build the app
 RUN npm run build
