@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy dependdency files
 COPY package*.json ./
-COPY package*.json /app
+COPY package*.json .
 
 RUN pwd
 
@@ -19,8 +19,7 @@ RUN ls -lrt
 RUN npm install
 RUN npm ci
 
-# Copy code
-COPY . .
+
 
 # Build the app
 RUN npm run build

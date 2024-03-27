@@ -30,8 +30,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: latest
+          
 
       - name: Debug message ECR
+        run: echo ${{ env.ECR_REPOSITORY}}
+
+      - name: Print message - ECR
         run: echo ${{ env.ECR_REPOSITORY}}
 
       - name: Cache NPM dependencies
