@@ -10,7 +10,7 @@ COPY package*.json .
 COPY public/ /app/
 COPY src/ /app/
 
-RUN ls --recursive /app/
+RUN ls -lrt /app/
 # Install packages
 RUN npm ci
 
