@@ -16,6 +16,7 @@ RUN pwd
 RUN ls -lrt
 
 # Install packages
+RUN npm install
 RUN npm ci
 
 # Copy code
