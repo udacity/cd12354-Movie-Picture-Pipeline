@@ -7,12 +7,13 @@ WORKDIR /app
 
 # Copy dependdency files
 COPY package*.json ./
+COPY package*.json /app
 
 RUN pwd
 
 #RUN cat package*.json
 
-RUN cat ./package*.json
+RUN cat /app/package*.json
 
 # Install packages
 RUN npm ci
