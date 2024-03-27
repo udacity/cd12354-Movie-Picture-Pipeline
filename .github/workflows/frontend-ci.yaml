@@ -138,13 +138,10 @@ jobs:
           # outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
         
-
   
 
     outputs:
       registry: ${{ steps.login-ecr.outputs.registry }}
       #docker_username: ${{ steps.login-ecr.outputs.docker_username_123456789012_dkr_ecr_us_east_1_amazonaws_com }} # More information on these outputs can be found below in the 'Docker Credentials' section
       #docker_password: ${{ steps.login-ecr.outputs.docker_password_123456789012_dkr_ecr_us_east_1_amazonaws_com }}
-
-      
       #TODO: Apply the Kubernetes manfiests using the image tag from build
