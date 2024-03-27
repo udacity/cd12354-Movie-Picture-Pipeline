@@ -37,11 +37,20 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-npm-cache-
 
+     
+
       # Install the dependencies.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
       # - name: Install the dependencies
       #  run:  cd starter/backend && npm ci
 
       # Run the linter.
+      - name: Run Flake8
+        run: |
+          flake8 .
       #- name: Run the linter
       #  run:  cd starter/backend && npm run lint
        
