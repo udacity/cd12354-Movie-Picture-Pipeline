@@ -129,10 +129,11 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
         with:
           context: .
-          #file: ./Dockerfile
+          file: starter/frontend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.vars.outputs.sha_short }}
+           # ${{ github.sha }}
             #${{ steps.vars.outputs.sha_short }}
           # outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
