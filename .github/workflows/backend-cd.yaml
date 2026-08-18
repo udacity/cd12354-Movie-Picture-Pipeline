@@ -65,8 +65,7 @@ jobs:
 
             - name: Deploy to Kubernetes
         working-directory: starter/backend/k8s
-        run: |
-          kubectl apply -k .
+        run: kubectl apply -k .
 
       - name: Update backend image
         run: |
