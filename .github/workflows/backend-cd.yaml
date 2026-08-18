@@ -26,10 +26,40 @@ jobs:
           aws-region: us-east-1
 
       - name: Configure kubectl for EKS
+        env:
+          EKS_ENDPOINT: ${{ secrets.EKS_ENDPOINT }}
+          EKS_CA: ${{ secrets.EKS_CA }}
         run: |
-          aws eks update-kubeconfig \
-            --region us-east-1 \
-            --name cluster
+          mkdir -p ~/.kube
+
+          cat > ~/.kube/config <<EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+            - name: cluster
+              cluster:
+                server: ${EKS_ENDPOINT}
+                certificate-authority-data: ${EKS_CA}
+          contexts:
+            - name: cluster
+              context:
+                cluster: cluster
+                user: github-action-user
+          current-context: cluster
+          users:
+            - name: github-action-user
+              user:
+                exec:
+                  apiVersion: client.authentication.k8s.io/v1beta1
+                  command: aws
+                  args:
+                    - eks
+                    - get-token
+                    - --cluster-name
+                    - cluster
+                    - --region
+                    - us-east-1
+          EOF
 
       - name: Deploy to Kubernetes
         working-directory: starter/backend/k8s
