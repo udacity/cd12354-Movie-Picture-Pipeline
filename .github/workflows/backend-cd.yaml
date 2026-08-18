@@ -50,12 +50,10 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Tag Docker image
-        run: |
-          docker tag mp-backend:latest 509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
+        run: docker tag mp-backend:latest 509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
 
       - name: Push Docker image to ECR
-        run: |
-          docker push 509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
+        run: docker push 509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
 
       - name: Configure kubectl for EKS
         run: |
@@ -63,7 +61,7 @@ jobs:
             --region us-east-1 \
             --name cluster
 
-            - name: Deploy to Kubernetes
+      - name: Deploy to Kubernetes
         working-directory: starter/backend/k8s
         run: kubectl apply -k .
 
@@ -73,5 +71,4 @@ jobs:
             backend=509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
 
       - name: Verify deployment
-        run: |
-          kubectl rollout status deployment/backend --timeout=180s
+        run: kubectl rollout status deployment/backend --timeout=180s
