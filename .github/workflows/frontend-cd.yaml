@@ -116,9 +116,9 @@ jobs:
           EOF
 
 
-      - name: Get frontend service URL
+      - name: Login to GitHub Container Registry
         run: |
-          kubectl get service frontend
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build frontend Docker image
         working-directory: starter/frontend
