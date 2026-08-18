@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: frontend
+          image: ghcr.io/sreshta-946/cd12354-movie-picture-pipeline-frontend:latest
           ports:
             - containerPort: 3000
