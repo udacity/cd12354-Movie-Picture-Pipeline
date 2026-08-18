@@ -115,21 +115,16 @@ jobs:
                     - us-east-1
           EOF
 
-      - name: Get backend service URL
-        run: |
-          kubectl get service backend
-          BACKEND_URL=$(kubectl get service backend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "BACKEND_URL=http://${BACKEND_URL}" >> "$GITHUB_ENV"
 
-      - name: Login to GitHub Container Registry
+      - name: Get frontend service URL
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          kubectl get service frontend
 
       - name: Build frontend Docker image
         working-directory: starter/frontend
         run: |
           docker build \
-            --build-arg REACT_APP_MOVIE_API_URL=${{ env.BACKEND_URL }} \
+            --build-arg REACT_APP_MOVIE_API_URL= \
             --tag ghcr.io/sreshta-946/cd12354-movie-picture-pipeline-frontend:latest \
             .
 
