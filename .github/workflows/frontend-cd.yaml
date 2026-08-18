@@ -1,0 +1,156 @@
+name: Frontend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+      - '.github/workflows/frontend-cd.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+  test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: CI=true npm test
+
+  build-and-deploy:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+
+    needs:
+      - lint
+      - test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Configure kubectl for EKS
+        env:
+          EKS_ENDPOINT: ${{ secrets.EKS_ENDPOINT }}
+          EKS_CA: ${{ secrets.EKS_CA }}
+        run: |
+          mkdir -p ~/.kube
+
+          cat > ~/.kube/config <<EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+            - name: cluster
+              cluster:
+                server: ${EKS_ENDPOINT}
+                certificate-authority-data: ${EKS_CA}
+          contexts:
+            - name: cluster
+              context:
+                cluster: cluster
+                user: github-action-user
+          current-context: cluster
+          users:
+            - name: github-action-user
+              user:
+                exec:
+                  apiVersion: client.authentication.k8s.io/v1beta1
+                  command: aws
+                  args:
+                    - eks
+                    - get-token
+                    - --cluster-name
+                    - cluster
+                    - --region
+                    - us-east-1
+          EOF
+
+      - name: Get backend service URL
+        run: |
+          kubectl get service backend
+          BACKEND_URL=$(kubectl get service backend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "BACKEND_URL=http://${BACKEND_URL}" >> "$GITHUB_ENV"
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build frontend Docker image
+        working-directory: starter/frontend
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL=${{ env.BACKEND_URL }} \
+            --tag ghcr.io/sreshta-946/cd12354-movie-picture-pipeline-frontend:latest \
+            .
+
+      - name: Push frontend image to GHCR
+        run: |
+          docker push ghcr.io/sreshta-946/cd12354-movie-picture-pipeline-frontend:latest
+
+      - name: Set frontend image
+        working-directory: starter/frontend/k8s
+        run: |
+          kustomize edit set image frontend=ghcr.io/sreshta-946/cd12354-movie-picture-pipeline-frontend:latest
+
+      - name: Deploy to Kubernetes
+        working-directory: starter/frontend/k8s
+        run: |
+          kubectl apply -k .
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/frontend --timeout=180s
+
+      - name: Get frontend service URL
+        run: |
+          kubectl get service frontend
