@@ -197,8 +197,9 @@ resource "aws_eks_node_group" "main" {
   version         = aws_eks_cluster.main.version
   node_role_arn   = aws_iam_role.node_group.arn
   subnet_ids      = [var.enable_private == true ? aws_subnet.private_subnet.id : aws_subnet.public_subnet.id]
-  release_version = nonsensitive(data.aws_ssm_parameter.eks_ami_release_version.value)
+  
   instance_types  = ["t3.small"]
+  ami_type = "AL2_x86_64"
 
   scaling_config {
     desired_size = 1
@@ -314,17 +315,4 @@ resource "aws_iam_role_policy_attachment" "codebuild" {
 ####################
 resource "aws_iam_user" "github_action_user" {
   name = "github-action-user"
-}
-
-resource "aws_iam_user_policy" "github_action_user_permission" {
-  user   = aws_iam_user.github_action_user.name
-  policy = data.aws_iam_policy_document.github_policy.json
-}
-
-data "aws_iam_policy_document" "github_policy" {
-  statement {
-    effect    = "Allow"
-    actions   = ["ecr:*", "eks:*", "ec2:*", "iam:GetUser"]
-    resources = ["*"]
-  }
 }
