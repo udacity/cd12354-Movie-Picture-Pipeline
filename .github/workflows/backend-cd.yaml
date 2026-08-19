@@ -9,14 +9,79 @@ on:
       - '.github/workflows/backend-cd.yaml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-and-deploy:
-    name: Build and Deploy Backend
+
+  lint:
+    name: Backend Lint
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/backend
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10.6"
+          cache: pipenv
+          cache-dependency-path: starter/backend/Pipfile.lock
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
+
+      - name: Run lint
+        run: pipenv run lint
+
+
+  test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10.6"
+          cache: pipenv
+          cache-dependency-path: starter/backend/Pipfile.lock
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
+
+      - name: Run tests
+        run: pipenv run test
+
+
+  build-and-deploy:
+    name: Build and Deploy Backend
+    runs-on: ubuntu-latest
+
+    needs:
+      - lint
+      - test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -24,6 +89,25 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+
+      - name: Build backend Docker image
+        working-directory: starter/backend
+        run: |
+          docker build \
+            --tag ${{ steps.login-ecr.outputs.registry }}/backend:${{ github.sha }} \
+            .
+
+
+      - name: Push backend Docker image
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/backend:${{ github.sha }}
+
 
       - name: Configure kubectl for EKS
         env:
@@ -61,15 +145,18 @@ jobs:
                     - us-east-1
           EOF
 
+
+      - name: Set backend image
+        working-directory: starter/backend/k8s
+        run: |
+          kustomize edit set image backend=${{ steps.login-ecr.outputs.registry }}/backend:${{ github.sha }}
+
+
       - name: Deploy to Kubernetes
         working-directory: starter/backend/k8s
         run: |
           kubectl apply -k .
 
-      - name: Update backend image
-        run: |
-          kubectl set image deployment/backend \
-            backend=509097766587.dkr.ecr.us-east-1.amazonaws.com/backend:latest
 
       - name: Verify deployment
         run: |
