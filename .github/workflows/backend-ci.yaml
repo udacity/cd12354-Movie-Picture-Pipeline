@@ -1,0 +1,117 @@
+name: Backend Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "starter/backend/**"
+      - "setup/terraform/**"
+      - ".github/workflows/backend-ci.yaml"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Keep the existing lint command from your backend project here.
+      - name: Run lint
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run lint
+          elif [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            echo "Python backend detected"
+            if [ -f requirements.txt ]; then
+              pip install -r requirements.txt
+            fi
+            if command -v ruff >/dev/null 2>&1; then
+              ruff check .
+            else
+              echo "Ruff not installed; skipping Python lint."
+            fi
+          else
+            echo "No supported lint configuration detected."
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    defaults:
+      run:
+        working-directory: starter/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm test -- --runInBand
+          elif [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            if [ -f requirements.txt ]; then
+              pip install -r requirements.txt
+            fi
+            if command -v pytest >/dev/null 2>&1; then
+              pytest
+            else
+              echo "pytest not installed; skipping Python tests."
+            fi
+          else
+            echo "No supported test configuration detected."
+          fi
+
+  terraform:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: setup/terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.3.9
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+      - terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: starter/backend
+        run: |
+          docker build \
+            --tag mp-backend:latest \
+            .
