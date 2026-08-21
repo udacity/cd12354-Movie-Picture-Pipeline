@@ -1,5 +1,6 @@
-FROM public.ecr.aws/docker/library/python:3.10-alpine
+FROM public.ecr.aws/docker/library/python:3.10.12-alpine3.18
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV CFLAGS="-I/usr/local/include/python3.10"
 
 WORKDIR /
 RUN adduser -u 1000 -D app
@@ -9,6 +10,7 @@ RUN apk update && \
   pcre-dev \
   build-base \
   gcc \
+  python3-dev \
   linux-headers \
   openssl \
   libffi-dev \
@@ -16,7 +18,7 @@ RUN apk update && \
 
 RUN mkdir -p /var/www/app && mkdir /app
 
-COPY Pipfile* /app
+COPY Pipfile* /app/
 RUN cd /app && pipenv install --system --deploy
 
 COPY . /app
