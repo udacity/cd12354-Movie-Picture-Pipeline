@@ -1,0 +1,34 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install pipenv && pipenv install --dev
+        working-directory: backend
+
+      - name: Lint
+        run: pipenv run flake8 .
+        working-directory: backend
+
+      - name: Run tests
+        run: pipenv run pytest
+        working-directory: backend
+
+      - name: Build
+        run: pipenv run python setup.py sdist
+        working-directory: backend
+
