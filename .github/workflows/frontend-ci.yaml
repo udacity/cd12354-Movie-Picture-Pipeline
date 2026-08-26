@@ -11,6 +11,9 @@ on:
 
 jobs:
 
+  # ============================================================
+  # FRONTEND LINT
+  # ============================================================
   lint:
     name: Frontend Lint
     runs-on: ubuntu-latest
@@ -34,6 +37,10 @@ jobs:
         working-directory: starter/frontend
         run: npm run lint
 
+
+  # ============================================================
+  # FRONTEND TESTS
+  # ============================================================
   test:
     name: Frontend Tests
     runs-on: ubuntu-latest
@@ -57,6 +64,10 @@ jobs:
         working-directory: starter/frontend
         run: CI=true npm test
 
+
+  # ============================================================
+  # BUILD AND PUSH FRONTEND DOCKER IMAGE
+  # ============================================================
   build:
     name: Build Frontend
     runs-on: ubuntu-latest
@@ -69,13 +80,53 @@ jobs:
       REACT_APP_MOVIE_API_URL: http://localhost:5000
 
     steps:
+
+      # --------------------------------------------------------
+      # Checkout repository
+      # --------------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+
+      # --------------------------------------------------------
+      # Configure AWS credentials
+      # --------------------------------------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+
+      # --------------------------------------------------------
+      # Login to Amazon ECR
+      # --------------------------------------------------------
+      - name: Login to Amazon ECR
+        run: |
+          ECR_REGISTRY="${{ secrets.FRONTEND_ECR_REPOSITORY }}"
+          ECR_REGISTRY="${ECR_REGISTRY%%/*}"
+
+          aws ecr get-login-password --region us-east-1 | \
+          docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+
+      # --------------------------------------------------------
+      # Build Docker image
+      # --------------------------------------------------------
       - name: Build Docker image
         working-directory: starter/frontend
         run: |
           docker build \
             --build-arg REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} \
-            --tag mp-frontend:latest \
+            --tag ${{ secrets.FRONTEND_ECR_REPOSITORY }}:latest \
             .
+
+
+      # --------------------------------------------------------
+      # Push Docker image to Amazon ECR
+      # --------------------------------------------------------
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.FRONTEND_ECR_REPOSITORY }}:latest
