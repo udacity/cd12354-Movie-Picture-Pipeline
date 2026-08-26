@@ -1,0 +1,81 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "starter/frontend/**"
+
+  workflow_dispatch:
+
+jobs:
+
+  lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: starter/frontend
+        run: npm ci
+
+      - name: Run lint
+        working-directory: starter/frontend
+        run: npm run lint
+
+  test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: starter/frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: starter/frontend
+        run: CI=true npm test
+
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+
+    needs:
+      - lint
+      - test
+
+    env:
+      REACT_APP_MOVIE_API_URL: http://localhost:5000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: starter/frontend
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} \
+            --tag mp-frontend:latest \
+            .
