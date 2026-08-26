@@ -1,3 +1,4 @@
+// Testing automatic Frontend CI trigger
 import React, { useState } from 'react';
 import MovieList from './components/MovieList';
 import MovieDetails from './components/MovieDetails';
