@@ -5,3 +5,8 @@ node_modules
 *.tfstate.backup
 credentials
 .pytest_cache
+__pycache__
+.venv-local
+build
+terraform.tfstate
+terraform.tfstate.backup
