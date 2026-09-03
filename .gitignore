@@ -4,4 +4,5 @@ node_modules
 .terraform.tfstate.lock.info
 *.tfstate.backup
 credentials
-.pytest_cache
+*.log
+tfplan

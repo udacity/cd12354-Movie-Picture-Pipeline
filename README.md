@@ -1,7 +1,9 @@
 # Movie Picture Pipeline
 
 You've been brought on as the DevOps resource for a development team that manages a web application that is a catalog of Movie Picture movies. They're in dire need of automating their development workflows in hopes of accelerating their release cycle. They'd like to use Github Actions to automate testing, building and deploying their applications to an existing Kubernetes cluster.
-
+Git repo: https://github.com/Chandanak-1/Movie-Picture-Pipeline.git <br>
+Frontend URL: http://a0a42e779afc3431fb17ce087eb20660-1064530887.us-east-1.elb.amazonaws.com <br>
+Backend URL: http://a7c51abd16698440f9e1c5e2eaf4d774-1295556671.us-east-1.elb.amazonaws.com<br>
 The team's project is comprised of 2 applications.
 
 1. A frontend UI written in Typescript, using the React framework
