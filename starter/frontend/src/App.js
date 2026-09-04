@@ -9,7 +9,6 @@ export default function App() {
   const handleMovieClick = (movie) => {
     setSelectedMovie(movie);
   };
-
   
   return (
     <div className="container">
