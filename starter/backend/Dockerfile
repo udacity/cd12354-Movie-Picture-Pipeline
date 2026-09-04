@@ -17,7 +17,7 @@ RUN apk update && \
 RUN mkdir -p /var/www/app && mkdir /app
 
 COPY Pipfile* /app
-ENV CFLAGS="-Who-error=incompatible-pointer-types"
+ENV CFLAGS="-Wno-error=incompatible-pointer-types"
 RUN cd /app && pipenv install --system --deploy
 
 COPY . /app
