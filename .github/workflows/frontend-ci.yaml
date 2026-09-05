@@ -1,0 +1,62 @@
+name: Frontend Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'starter/frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: starter/frontend
+        run: npm install
+      
+      - name: Run linter
+        working-directory: starter/frontend
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'starter/frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: starter/frontend
+        run: npm install
+      
+      - name: Run tests
+        working-directory: starter/frontend
+        run: npm run test -- --watchAll=false
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'starter/frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: starter/frontend
+        run: npm install
+      
+      - name: Build frontend
+        working-directory: starter/frontend
+        run: npm run build

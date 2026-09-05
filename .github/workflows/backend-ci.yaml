@@ -1,0 +1,71 @@
+name: Backend Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pipenv'
+          cache-dependency-path: 'starter/backend/Pipfile.lock'
+      
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Install dependencies
+        working-directory: starter/backend
+        run: pipenv install --dev
+      
+      - name: Run linter
+        working-directory: starter/backend
+        run: pipenv run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pipenv'
+          cache-dependency-path: 'starter/backend/Pipfile.lock'
+      
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Install dependencies
+        working-directory: starter/backend
+        run: pipenv install --dev
+      
+      - name: Run tests
+        working-directory: starter/backend
+        run: pipenv run test
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pipenv'
+          cache-dependency-path: 'starter/backend/Pipfile.lock'
+      
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Install dependencies
+        working-directory: starter/backend
+        run: pipenv install
+      
+      - name: Build backend
+        working-directory: starter/backend
+        run: pipenv run build

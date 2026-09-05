@@ -1,0 +1,127 @@
+name: Backend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pipenv'
+          cache-dependency-path: 'starter/backend/Pipfile.lock'
+      
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Install dependencies
+        working-directory: starter/backend
+        run: pipenv install --dev
+      
+      - name: Run linter
+        working-directory: starter/backend
+        run: pipenv run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pipenv'
+          cache-dependency-path: 'starter/backend/Pipfile.lock'
+      
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Install dependencies
+        working-directory: starter/backend
+        run: pipenv install --dev
+      
+      - name: Run tests
+        working-directory: starter/backend
+        run: pipenv run test
+
+  build-and-deploy:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Build and push backend image to ECR
+        working-directory: starter/backend
+        env:
+          ECR_REGISTRY: 221619254663.dkr.ecr.us-east-1.amazonaws.com
+          ECR_REPOSITORY: backend
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: 221619254663.dkr.ecr.us-east-1.amazonaws.com
+          ECR_REPOSITORY: backend
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws eks update-kubeconfig --name cluster --region us-east-1
+          kubectl set image deployment/backend \
+            backend=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -n default --record || \
+          kubectl apply -f - <<KUBECTL
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: backend
+            namespace: default
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: backend
+            template:
+              metadata:
+                labels:
+                  app: backend
+              spec:
+                containers:
+                - name: backend
+                  image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                  ports:
+                  - containerPort: 5000
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: backend
+            namespace: default
+          spec:
+            type: LoadBalancer
+            selector:
+              app: backend
+            ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 5000
+          KUBECTL
