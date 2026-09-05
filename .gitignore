@@ -1,7 +1,20 @@
-node_modules
-.pytest_cache
-.terraform
-.terraform.tfstate.lock.info
-*.tfstate.backup
-credentials
-.pytest_cache
+# Terraform
+setup/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Environment
+.env
+starter/frontend/.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.DS_Store
