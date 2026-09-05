@@ -1,5 +1,6 @@
 FROM public.ecr.aws/docker/library/python:3.10-alpine
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV CFLAGS="-std=gnu17"
 
 WORKDIR /
 RUN adduser -u 1000 -D app
