@@ -1,0 +1,128 @@
+name: Backend CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: cluster
+  ECR_REPOSITORY: backend
+
+jobs:
+  lint:
+    name: Backend lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/backend
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install pipenv
+        run: python -m pip install --upgrade pip pipenv
+
+      - name: Install backend dependencies
+        run: pipenv install --dev
+
+      - name: Run backend lint
+        run: pipenv run lint
+
+  test:
+    name: Backend test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/backend
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install pipenv
+        run: python -m pip install --upgrade pip pipenv
+
+      - name: Install backend dependencies
+        run: pipenv install --dev
+
+      - name: Run backend tests
+        run: pipenv run test
+
+  build:
+    name: Build and push backend image
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend Docker image
+        working-directory: starter/backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build --tag $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ github.sha }} .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy backend to EKS
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      # Connect GitHub Actions to the existing EKS cluster created by Terraform.
+      - name: Update kubeconfig for EKS cluster
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      # Update the image reference in the Kustomize deployment and apply it.
+      - name: Set docker image in Kustomize and deploy
+        working-directory: starter/backend/k8s
+        run: |
+          ECR_REPO_URL=$(aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} --query 'repositories[0].repositoryUri' --output text)
+          kustomize edit set image backend=${ECR_REPO_URL}:${{ github.sha }}
+          kustomize build | kubectl apply -f -
+          kubectl rollout status deployment/backend --timeout=180s
