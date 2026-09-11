@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::680489870992:role/udacity-node-group
+      groups:
+      - system:bootstrappers
+      - system:nodes
+      username: system:node:{{EC2PrivateDNSName}}
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2026-09-11T14:18:33Z"
+  name: aws-auth
+  namespace: kube-system
+  resourceVersion: "1068"
+  uid: 48bcec71-d371-4662-ad1d-f2d4fa6b2488
