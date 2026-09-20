@@ -25,3 +25,4 @@ export default function App() {
     </div>
   );
 }
+// CI pipeline test
