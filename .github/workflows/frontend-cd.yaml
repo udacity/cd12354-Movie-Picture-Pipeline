@@ -1,0 +1,269 @@
+name: Frontend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+      - '.github/workflows/frontend-cd.yaml'
+  # Allows the workflow to be run on-demand from the Actions tab. Also the way to
+  # rebuild the frontend after the backend LoadBalancer address changes.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Deployments queue rather than cancel -- a half-applied manifest is worse than a wait.
+concurrency:
+  group: frontend-cd
+  cancel-in-progress: false
+
+env:
+  WORKDIR: starter/frontend
+  # Defaults match setup/terraform (region us-east-1, cluster "cluster", ECR repo "frontend").
+  # Override any of them by setting the matching repository secret.
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME || 'cluster' }}
+  ECR_REPOSITORY: ${{ secrets.ECR_FRONTEND_REPO || 'frontend' }}
+
+jobs:
+  # `lint` and `test` declare no `needs`, so GitHub runs them in parallel.
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci
+
+      - name: Run lint
+        working-directory: ${{ env.WORKDIR }}
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ env.WORKDIR }}
+        env:
+          CI: true # makes react-scripts run the suite once and exit instead of watching
+        run: npm run test
+
+  build:
+    name: Build and push image
+    # Only runs once both lint and test have succeeded.
+    needs:
+      - lint
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Secrets are read through `env`, never interpolated into the shell source.
+      - name: Check AWS credentials are configured
+        shell: bash
+        env:
+          AWS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if [ -z "$AWS_KEY_ID" ] || [ -z "$AWS_SECRET" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are not set. Add them under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # REACT_APP_MOVIE_API_URL is baked into the bundle at build time by the
+      # Dockerfile ARG, so the backend address must be known before docker build.
+      # Preferred source is the repository secret; if it is not set, fall back to
+      # reading the backend Service address off the cluster.
+      - name: Resolve the backend API URL
+        shell: bash
+        env:
+          API_URL_SECRET: ${{ secrets.REACT_APP_MOVIE_API_URL }}
+        run: |
+          URL="$API_URL_SECRET"
+          if [ -z "$URL" ]; then
+            aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION"
+            HOST=$(kubectl get svc backend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+            if [ -n "$HOST" ]; then
+              URL="http://$HOST"
+            fi
+          fi
+          if [ -z "$URL" ]; then
+            echo "::error::Could not determine the backend URL. Set the REACT_APP_MOVIE_API_URL repository secret, or deploy the backend first so its LoadBalancer address can be discovered."
+            exit 1
+          fi
+          echo "REACT_APP_MOVIE_API_URL=$URL" >> "$GITHUB_ENV"
+          echo "Frontend will call the API at $URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build and push image tagged with the git SHA
+        id: push
+        shell: bash
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL="$REACT_APP_MOVIE_API_URL" \
+            --tag "$IMAGE" "$WORKDIR"
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          echo "Pushed $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+
+      # Confirms the image really landed in ECR rather than trusting the push exit code.
+      - name: Verify the image exists in ECR
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --region "$AWS_REGION" \
+            --output table
+
+  deploy:
+    name: Deploy to EKS
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: ${{ steps.report.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION"
+
+      # `kubectl kustomize` can build but not edit, so the standalone binary is
+      # needed for `kustomize edit set image`. No-op when the runner already has it.
+      - name: Ensure kustomize is available
+        shell: bash
+        run: |
+          if ! command -v kustomize >/dev/null 2>&1; then
+            curl -sS "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+            sudo mv kustomize /usr/local/bin/
+          fi
+          kustomize version
+
+      # These edits apply only to the ephemeral runner checkout and are never committed.
+      - name: Set the image tag in the manifests
+        working-directory: ${{ env.WORKDIR }}/k8s
+        run: kustomize edit set image frontend=${{ needs.build.outputs.image }}
+
+      - name: Apply the Kubernetes manifests
+        working-directory: ${{ env.WORKDIR }}/k8s
+        run: kustomize build | kubectl apply -f -
+
+      # Fails the job if pods never become ready, instead of reporting a false success.
+      - name: Verify rollout
+        shell: bash
+        run: |
+          if ! kubectl rollout status deployment/frontend --timeout=180s; then
+            echo "::error::Frontend rollout did not become ready within 180s."
+            kubectl get pods -l app=frontend -o wide
+            kubectl describe deployment/frontend
+            kubectl logs -l app=frontend --tail=50 --all-containers=true || true
+            exit 1
+          fi
+
+      - name: Show deployment state
+        run: |
+          kubectl get deployment frontend
+          kubectl get pods -l app=frontend
+          kubectl get service frontend
+
+      - name: Report the frontend URL
+        id: report
+        shell: bash
+        run: |
+          HOST=$(kubectl get svc frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "url=http://$HOST" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Frontend deployed"
+            echo ""
+            echo "- Image: ${{ needs.build.outputs.image }}"
+            echo "- Open: http://$HOST"
+            echo ""
+            echo "Expect the heading 'Movie List' above three titles."
+            echo "An empty list means the image was built with the wrong API URL."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  notify:
+    name: Notify on failure
+    needs:
+      - lint
+      - test
+      - build
+      - deploy
+    if: failure()
+    uses: ./.github/workflows/notify-failure.yaml
+    permissions:
+      contents: read
+      issues: write
+    with:
+      app: frontend-cd

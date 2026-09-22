@@ -1,0 +1,66 @@
+name: Notify Failure
+
+# Reusable failure reporter, called by the four app workflows with `if: failure()`.
+# Keeps the reporting logic in one place instead of pasting it into every workflow.
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: Name of the workflow that failed, e.g. frontend-ci
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    name: Report failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Write failure report to job summary
+        shell: bash
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          {
+            echo "## Pipeline failed: ${{ inputs.app }}"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Workflow | \`${{ inputs.app }}\` |"
+            echo "| Triggered by | \`${{ github.event_name }}\` by @${{ github.actor }} |"
+            echo "| Ref | \`${{ github.ref_name }}\` |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Run | [#${{ github.run_number }}]($RUN_URL) |"
+            echo ""
+            echo "Open the run above and expand the red job to see the failing step."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Pull requests already surface failures as a red check on the PR, so filing
+      # an issue there would just be noise. Only report failures on main / manual runs.
+      - name: Open a tracking issue
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY=$(cat <<EOF
+          The \`${{ inputs.app }}\` pipeline failed.
+
+          - **Run:** $RUN_URL
+          - **Commit:** ${{ github.sha }}
+          - **Ref:** ${{ github.ref_name }}
+          - **Event:** ${{ github.event_name }}
+          - **Actor:** @${{ github.actor }}
+
+          Opened automatically by \`.github/workflows/notify-failure.yml\`.
+          EOF
+          )
+          TITLE="CI/CD failure: ${{ inputs.app }} on ${{ github.ref_name }} (run #${{ github.run_number }})"
+          # Retry without the label, so a missing label can't swallow the notification.
+          gh issue create --repo "${{ github.repository }}" --title "$TITLE" --label ci-failure --body "$BODY" \
+            || gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" \
+            || echo "::warning::Could not open an issue (are Issues enabled on this repo?). Failure details are in the job summary above."

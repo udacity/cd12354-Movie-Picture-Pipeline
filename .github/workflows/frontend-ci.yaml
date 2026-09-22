@@ -1,0 +1,141 @@
+name: Frontend Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+      - '.github/workflows/frontend-ci.yaml'
+  # Allows the workflow to be run on-demand from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKDIR: starter/frontend
+  # Passed to the Docker build as a build-arg rather than hardcoded in the command.
+  REACT_APP_MOVIE_API_URL: http://localhost:5000
+
+jobs:
+  # `lint` and `test` declare no `needs`, so GitHub runs them in parallel.
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci
+
+      - name: Run lint
+        working-directory: ${{ env.WORKDIR }}
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ env.WORKDIR }}
+        env:
+          CI: true # makes react-scripts run the suite once and exit instead of watching
+        run: npm run test
+
+  build:
+    name: Build
+    # Only runs once both lint and test have succeeded.
+    needs:
+      - lint
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: starter/frontend/.nvmrc
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('starter/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ env.WORKDIR }}
+        env:
+          CI: true
+        run: npm run test
+
+      - name: Build application with Docker
+        working-directory: ${{ env.WORKDIR }}
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL="$REACT_APP_MOVIE_API_URL" \
+            --tag mp-frontend:latest .
+
+  notify:
+    name: Notify on failure
+    needs:
+      - lint
+      - test
+      - build
+    if: failure()
+    uses: ./.github/workflows/notify-failure.yaml
+    permissions:
+      contents: read
+      issues: write
+    with:
+      app: frontend-ci
