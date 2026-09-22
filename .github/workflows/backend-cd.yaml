@@ -1,0 +1,247 @@
+name: Backend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+      - '.github/workflows/backend-cd.yaml'
+  # Allows the workflow to be run on-demand from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Deployments queue rather than cancel -- a half-applied manifest is worse than a wait.
+concurrency:
+  group: backend-cd
+  cancel-in-progress: false
+
+env:
+  WORKDIR: starter/backend
+  PYTHON_VERSION: '3.10'
+  # Defaults match setup/terraform (region us-east-1, cluster "cluster", ECR repo "backend").
+  # Override any of them by setting the matching repository secret.
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME || 'cluster' }}
+  ECR_REPOSITORY: ${{ secrets.ECR_BACKEND_REPO || 'backend' }}
+
+jobs:
+  # `lint` and `test` declare no `needs`, so GitHub runs them in parallel.
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('starter/backend/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install pipenv
+        run: pip install --upgrade pipenv
+
+      # `--dev` is required. flake8 is declared under [dev-packages] in the Pipfile,
+      # so a plain `pipenv install` leaves `pipenv run lint` failing with
+      # "flake8: not found" (exit 127). Verified against this Pipfile.
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv install --dev
+
+      - name: Run lint
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('starter/backend/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install pipenv
+        run: pip install --upgrade pipenv
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv install --dev
+
+      - name: Run tests
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv run test
+
+  build:
+    name: Build and push image
+    # Only runs once both lint and test have succeeded.
+    needs:
+      - lint
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Secrets are read through `env`, never interpolated into the shell source.
+      - name: Check AWS credentials are configured
+        shell: bash
+        env:
+          AWS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if [ -z "$AWS_KEY_ID" ] || [ -z "$AWS_SECRET" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are not set. Add them under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image tagged with the git SHA
+        id: push
+        shell: bash
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build --tag "$IMAGE" "$WORKDIR"
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          echo "Pushed $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+
+      # Confirms the image really landed in ECR rather than trusting the push exit code.
+      - name: Verify the image exists in ECR
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --region "$AWS_REGION" \
+            --output table
+
+  deploy:
+    name: Deploy to EKS
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: ${{ steps.report.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION"
+
+      # `kubectl kustomize` can build but not edit, so the standalone binary is
+      # needed for `kustomize edit set image`. No-op when the runner already has it.
+      - name: Ensure kustomize is available
+        shell: bash
+        run: |
+          if ! command -v kustomize >/dev/null 2>&1; then
+            curl -sS "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+            sudo mv kustomize /usr/local/bin/
+          fi
+          kustomize version
+
+      # These edits apply only to the ephemeral runner checkout and are never committed.
+      - name: Set the image tag in the manifests
+        working-directory: ${{ env.WORKDIR }}/k8s
+        run: kustomize edit set image backend=${{ needs.build.outputs.image }}
+
+      - name: Apply the Kubernetes manifests
+        working-directory: ${{ env.WORKDIR }}/k8s
+        run: kustomize build | kubectl apply -f -
+
+      # Fails the job if pods never become ready, instead of reporting a false success.
+      - name: Verify rollout
+        shell: bash
+        run: |
+          if ! kubectl rollout status deployment/backend --timeout=180s; then
+            echo "::error::Backend rollout did not become ready within 180s."
+            kubectl get pods -l app=backend -o wide
+            kubectl describe deployment/backend
+            kubectl logs -l app=backend --tail=50 --all-containers=true || true
+            exit 1
+          fi
+
+      - name: Show deployment state
+        run: |
+          kubectl get deployment backend
+          kubectl get pods -l app=backend
+          kubectl get service backend
+
+      - name: Report the backend URL
+        id: report
+        shell: bash
+        run: |
+          HOST=$(kubectl get svc backend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "url=http://$HOST" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Backend deployed"
+            echo ""
+            echo "- Image: ${{ needs.build.outputs.image }}"
+            echo "- API: http://$HOST/movies"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  notify:
+    name: Notify on failure
+    needs:
+      - lint
+      - test
+      - build
+      - deploy
+    if: failure()
+    uses: ./.github/workflows/notify-failure.yaml
+    permissions:
+      contents: read
+      issues: write
+    with:
+      app: backend-cd

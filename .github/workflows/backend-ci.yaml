@@ -1,0 +1,122 @@
+name: Backend Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+      - '.github/workflows/backend-ci.yaml'
+  # Allows the workflow to be run on-demand from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKDIR: starter/backend
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  # `lint` and `test` declare no `needs`, so GitHub runs them in parallel.
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('starter/backend/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install pipenv
+        run: pip install --upgrade pipenv
+
+      # `--dev` is required. flake8 is declared under [dev-packages] in the Pipfile,
+      # so a plain `pipenv install` leaves `pipenv run lint` failing with
+      # "flake8: not found" (exit 127). Verified against this Pipfile.
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv install --dev
+
+      - name: Run lint
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('starter/backend/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install pipenv
+        run: pip install --upgrade pipenv
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv install --dev
+
+      - name: Run tests
+        working-directory: ${{ env.WORKDIR }}
+        run: pipenv run test
+
+  build:
+    name: Build
+    # Only runs once both lint and test have succeeded.
+    needs:
+      - lint
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # CI builds the image only. Nothing is pushed from this workflow.
+      - name: Build application with Docker
+        working-directory: ${{ env.WORKDIR }}
+        run: docker build --tag mp-backend:latest .
+
+  notify:
+    name: Notify on failure
+    needs:
+      - lint
+      - test
+      - build
+    if: failure()
+    uses: ./.github/workflows/notify-failure.yaml
+    permissions:
+      contents: read
+      issues: write
+    with:
+      app: backend-ci
