@@ -5,9 +5,10 @@ name = "pypi"
 
 [packages]
 flask = "*"
-uwsgi = "*"
 flask-cors = "*"
 pytest = "*"
+uwsgi = "*"
+six = "*"
 
 [dev-packages]
 black = "*"

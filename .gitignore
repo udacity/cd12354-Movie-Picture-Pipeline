@@ -1,7 +1,7 @@
 node_modules
 .pytest_cache
 .terraform
-.terraform.tfstate.lock.info
+*.tfstate
 *.tfstate.backup
+.terraform.tfstate.lock.info
 credentials
-.pytest_cache
