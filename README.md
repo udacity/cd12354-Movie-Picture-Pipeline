@@ -410,3 +410,5 @@ kustomize build | kubectl apply -f -
 ## License
 
 [License](LICENSE.md)
+
+Frontend CI verification update.
