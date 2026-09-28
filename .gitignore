@@ -1,7 +1,15 @@
-node_modules
-.pytest_cache
-.terraform
-.terraform.tfstate.lock.info
-*.tfstate.backup
-credentials
-.pytest_cache
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
+*.tfplan
+
+# Node
+node_modules/
+build/
+
+# Scratch files from lab troubleshooting
+eks-describe.json
+smoke-source.json
+codebuild-trust.json
