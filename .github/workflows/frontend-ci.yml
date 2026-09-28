@@ -1,0 +1,36 @@
+name: frontend-ci
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - run: npm ci
+        working-directory: starter/frontend
+
+      - run: npm run lint
+        working-directory: starter/frontend
+
+      - run: npm test
+        working-directory: starter/frontend
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint-and-test]
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: docker build -t frontend:latest ./starter/frontend

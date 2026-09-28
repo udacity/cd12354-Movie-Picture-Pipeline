@@ -1,0 +1,36 @@
+name: backend-ci
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - run: pipenv install
+        working-directory: starter/backend
+
+      - run: pipenv run lint
+        working-directory: starter/backend
+
+      - run: pipenv run test
+        working-directory: starter/backend
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint-and-test]
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker build -t my-app:latest .
+        working-directory: ./starter/backend
