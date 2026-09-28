@@ -1,0 +1,54 @@
+name: Backend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+      - '.github/workflows/backend-cd.yaml'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Backend CD
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build backend Docker image
+        working-directory: starter/backend
+        run: |
+          docker build -t backend:latest .
+
+      - name: Tag backend Docker image
+        run: |
+          docker tag backend:latest ${{ secrets.BACKEND_ECR_REPOSITORY }}:latest
+
+      - name: Push backend Docker image
+        run: |
+          docker push ${{ secrets.BACKEND_ECR_REPOSITORY }}:latest
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy backend to Kubernetes
+        run: |
+          kubectl apply -k starter/backend/k8s

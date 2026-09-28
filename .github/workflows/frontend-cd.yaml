@@ -1,0 +1,54 @@
+name: Frontend Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'
+      - '.github/workflows/frontend-cd.yaml'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Frontend CD
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build frontend Docker image
+        working-directory: starter/frontend
+        run: |
+          docker build -t frontend:latest .
+
+      - name: Tag frontend Docker image
+        run: |
+          docker tag frontend:latest ${{ secrets.FRONTEND_ECR_REPOSITORY }}:latest
+
+      - name: Push frontend Docker image
+        run: |
+          docker push ${{ secrets.FRONTEND_ECR_REPOSITORY }}:latest
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy frontend to Kubernetes
+        run: |
+          kubectl apply -k starter/frontend/k8s
