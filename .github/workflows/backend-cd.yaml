@@ -1,0 +1,45 @@
+name: Backend CD
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install pipenv && pipenv install --dev
+        working-directory: backend
+
+      - name: Run tests
+        run: pipenv run pytest
+        working-directory: backend
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image
+        run: |
+          docker build -t ${{ secrets.ECR_REGISTRY }}/backend:latest backend
+          docker push ${{ secrets.ECR_REGISTRY }}/backend:latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+          kubectl apply -f backend/k8s/
