@@ -1,10 +1,10 @@
-name: Frontend Continuous Deployment
+name: starter/frontend Continuous Deployment
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - 'frontend/**'
+      - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: starter/frontend
     steps:
       - uses: actions/checkout@v3
       - name: Setup NodeJS
@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: starter/frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
       - name: Run linting
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: starter/frontend
     steps:
       - uses: actions/checkout@v3
       - name: Setup NodeJS
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: starter/frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: starter/frontend
     steps:
       - uses: actions/checkout@v3
       
@@ -67,7 +67,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: mp-frontend
+          ECR_REPOSITORY: mp-starter/frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build --build-arg REACT_APP_MOVIE_API_URL="http://localhost:5000" -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -79,9 +79,9 @@ jobs:
       - name: Deploy to EKS
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: mp-frontend
+          ECR_REPOSITORY: mp-starter/frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd k8s
-          kustomize edit set image frontend=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kustomize edit set image starter/frontend=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           kustomize build | kubectl apply -f -

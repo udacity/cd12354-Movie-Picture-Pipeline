@@ -1,10 +1,10 @@
-name: Backend Continuous Integration
+name: starter/backend Continuous Integration
 
 on:
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'backend/**'
+      - 'starter/backend/**'
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: starter/backend
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pipenv' # Meets the "Stand Out" caching criteria
-          cache-dependency-path: backend/Pipfile.lock
+          cache-dependency-path: starter/backend/Pipfile.lock
       - name: Install pipenv and dependencies
         run: |
           pip install pipenv
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: starter/backend
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pipenv'
-          cache-dependency-path: backend/Pipfile.lock
+          cache-dependency-path: starter/backend/Pipfile.lock
       - name: Install pipenv and dependencies
         run: |
           pip install pipenv
@@ -53,8 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: starter/backend
     steps:
       - uses: actions/checkout@v3
       - name: Build Docker Image
-        run: docker build --tag mp-backend:latest .
+        run: docker build --tag mp-starter/backend:latest .
