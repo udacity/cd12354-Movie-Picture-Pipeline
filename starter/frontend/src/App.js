@@ -9,7 +9,7 @@ export default function App() {
   const handleMovieClick = (movie) => {
     setSelectedMovie(movie);
   };
-
+  // Frontend CI verification
   return (
     <div className="container">
       <h1>Movie List</h1>
