@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask.views import MethodView
 
+
 # Dummy database to hold movie examples
 movies = {
     "123": {"title": "Top Gun: Maverick", "description": "Fighter planes"},
@@ -9,6 +10,7 @@ movies = {
 }
 
 
+# comment added to test the ci pipeline
 class Movies(MethodView):
     def get(self, movie_id):
         if movie_id is None:

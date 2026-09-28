@@ -3,6 +3,7 @@ import MovieList from './components/MovieList';
 import MovieDetails from './components/MovieDetails';
 import './App.css';
 
+// Added to check frontend ci
 export default function App() {
   const [selectedMovie, setSelectedMovie] = useState(null);
 
