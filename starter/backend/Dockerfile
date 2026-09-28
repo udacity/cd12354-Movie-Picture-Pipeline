@@ -1,4 +1,5 @@
-FROM public.ecr.aws/docker/library/python:3.10-alpine
+# Backend CI test change
+FROM public.ecr.aws/docker/library/python:3.10-alpine3.20
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
