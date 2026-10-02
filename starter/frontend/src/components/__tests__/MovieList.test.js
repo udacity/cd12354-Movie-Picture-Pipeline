@@ -16,7 +16,7 @@ test('renders movie titles', async () => {
   const onMovieClick = jest.fn();
   render(<MovieList onMovieClick={onMovieClick} />);
 
-  const movie1 = await screen.findByText(/Movie 1/);
+  const movie1 = await screen.findByText(/Wrong Title/);
   const movie2 = await screen.findByText(/Movie 2/);
 
   expect(movie1).toBeInTheDocument();
