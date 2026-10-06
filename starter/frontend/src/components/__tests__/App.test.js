@@ -6,7 +6,7 @@ import App from '../../App';
 
 jest.mock('axios');
 
-const movieHeading = process.env.FAIL_TEST ? 'WRONG_HEADING' : 'Movie List';
+const movieHeading = process.env.FAIL_TEST === 'true' ? 'WRONG_HEADING' : 'Movie List';
 
 test('renders Movie List heading', () => {
   axios.get.mockResolvedValueOnce({ data: { movies: [] } });
