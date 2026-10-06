@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --transformIgnorePatterns",
+    "test": "react-scripts test",
     "clean": "rm -rf ./node_modules && rm -rf ./build"
   },
   "eslintConfig": {
