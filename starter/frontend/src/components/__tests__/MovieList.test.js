@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import axios from 'axios';
 import MovieList from '../MovieList';
 
-jest.mock('axios');
+jest.mock('axios', () => ({ get: jest.fn() }));
 
 const mockMovies = [
   { id: 1, title: 'Movie 1' },
