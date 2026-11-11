@@ -11,6 +11,9 @@ defaults:
   run:
     working-directory: starter/backend
 
+env:
+  CFLAGS: -Wno-error=incompatible-pointer-types
+
 jobs:
   lint:
     runs-on: ubuntu-latest
