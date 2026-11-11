@@ -17,9 +17,7 @@ RUN apk update && \
 RUN mkdir -p /var/www/app && mkdir /app
 
 COPY Pipfile* /app
-# uWSGI 2.0.21 does not compile with the C23 default of GCC 15 (current Alpine),
-# so build it with the previous C standard.
-RUN cd /app && CFLAGS="-std=gnu17" pipenv install --system --deploy
+RUN cd /app && pipenv install --system --deploy
 
 COPY . /app
 
