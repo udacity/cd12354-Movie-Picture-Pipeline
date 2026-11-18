@@ -1,0 +1,74 @@
+name: Frontend Continuous Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'starter/frontend/**'
+  workflow_dispatch:
+
+env:
+  REACT_APP_MOVIE_API_URL: http://localhost:5000
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
+      - run: npm ci
+      - run: CI=true npm test
+
+  build-and-deploy:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+      - uses: aws-actions/amazon-ecr-login@v1
+      - name: Build and push
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          REPO: ${{ secrets.ECR_REPOSITORY_FRONTEND }}
+        run: |
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} -t $REPO:$IMAGE_TAG .
+          docker push $REPO:$IMAGE_TAG
+      - name: Deploy to Kubernetes
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          REPO: ${{ secrets.ECR_REPOSITORY_FRONTEND }}
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region us-east-1
+          cd k8s
+          kustomize edit set image frontend=$REPO:$IMAGE_TAG
+          kustomize build | kubectl apply -f -
