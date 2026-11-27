@@ -28,7 +28,6 @@ jobs:
 
       - name: Install pipenv and dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y libpcre3-dev
           pip install --upgrade pip pipenv
           CFLAGS="-std=gnu17" pipenv install --dev
 
@@ -53,7 +52,6 @@ jobs:
 
       - name: Install pipenv and dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y libpcre3-dev
           pip install --upgrade pip pipenv
           CFLAGS="-std=gnu17" pipenv install --dev
 
